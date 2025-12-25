@@ -3,7 +3,10 @@ const gallery = document.getElementById("gallery");
 
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modal-image");
-const shareX = document.getElementById("share-x");
+const shareUrl = `${location.origin}/image/${n}`;
+const xIntent = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
+window.open(xIntent, "_blank");
+
 const closeBtn = document.querySelector(".modal-close");
 const prevBtn = document.querySelector(".nav.prev");
 const nextBtn = document.querySelector(".nav.next");
@@ -79,3 +82,4 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") showPrev();
   if (e.key === "ArrowRight") showNext();
 });
+
