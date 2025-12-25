@@ -1,4 +1,14 @@
 // app.js
+
+window.addEventListener("load", () => {
+  const m = location.hash.match(/^#img=(\d+)$/);
+  if (m) {
+    const n = parseInt(m[1], 10);
+    // ここで n 番の画像を開く関数を呼ぶ
+    openModalByIndex(n);
+  }
+});
+
 const gallery = document.getElementById("gallery");
 
 const modal = document.getElementById("modal");
@@ -82,4 +92,5 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") showPrev();
   if (e.key === "ArrowRight") showNext();
 });
+
 
