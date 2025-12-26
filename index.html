@@ -4,17 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>@hou_enj/illustration</title>
-
   <!-- トップのOGP（固定でOK）。画像ごとのOGPは /image/{id} が担当 -->
   <meta property="og:title" content="苞 イラストギャラリー">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hou-gallery.pages.dev/">
   <meta property="og:image" content="https://hou-gallery.pages.dev/images/1%20(1).jpg">
   <meta name="twitter:card" content="summary_large_image">
-
   <link rel="stylesheet" href="./styles.css" />
 </head>
-
 <body>
   <header class="topbar">
     <div class="brand">@hou_enj/illustration</div>
@@ -23,7 +20,6 @@
       <a href="mailto:hou.ekaki@gmail.com">Mail</a>
     </div>
   </header>
-
   <div class="wrap">
     <div class="about">
       苞(@hou_enj)の創作や版権物をまとめたイラストサイトです。<br>
@@ -35,20 +31,10 @@
         <a class="btn" href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion" target="_blank" rel="noopener">マシュマロ</a>
       </div>
     </div>
-
     <div id="msg"></div>
-    <div id="grid" class="grid"></div>
+    <div id="carousel" class="carousel"></div>  <!-- grid を carousel に変更 -->
   </div>
-
-  <!-- modal -->
-  <div id="modal" class="modal" aria-hidden="true">
-    <button id="close" class="close">×</button>
-    <button id="prev" class="nav prev">‹</button>
-    <img id="modalImg" class="modalImg" alt="">
-    <button id="next" class="nav next">›</button>
-    <a id="share" class="share" href="#" target="_blank" rel="noopener">Xで共有</a>
-  </div>
-
+  <!-- モーダルは削除（必要なら残して） -->
   <script src="./app.js"></script>
 </body>
 </html>
