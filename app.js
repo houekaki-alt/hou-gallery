@@ -1,82 +1,88 @@
-// app.js
-const gallery = document.getElementById("gallery");
-
-const modal = document.getElementById("modal");
-const modalImg = document.getElementById("modal-image");
-const shareX = document.getElementById("share-x");
-const closeBtn = document.querySelector(".modal-close");
-const prevBtn = document.querySelector(".nav.prev");
-const nextBtn = document.querySelector(".nav.next");
-
 let images = [];
-let currentIndex = -1;
+let current = 0;
 
-const res = await fetch('./images.json');
-  .then(r => r.json())
-  .then(list => {
-    images = list;
-    images.forEach((src, idx) => {
-      const a = document.createElement("a");
-      a.className = "gallery-item";
-      a.href = src;
-      a.onclick = e => {
-        e.preventDefault();
-        openModal(idx);
-      };
+const grid = document.getElementById('grid');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
+const closeBtn = document.getElementById('close');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const shareA = document.getElementById('share');
 
-      const img = document.createElement("img");
-      img.src = src;
-      img.loading = "lazy";
-      img.alt = "";
+function openModal(i) {
+  current = i;
+  const item = images[current];
+  if (!item) return;
 
-      a.appendChild(img);
-      gallery.appendChild(a);
-    });
+  modalImg.src = item.src;
+  modalImg.alt = item.alt || '';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+
+  // URLを ?img= にする（戻るボタンでも復元しやすい）
+  const url = new URL(location.href);
+  url.searchParams.set('img', String(item.id));
+  history.replaceState(null, '', url.toString());
+
+  // X共有リンク（/image/ID を共有する）
+  const shareUrl = `${location.origin}/image/${item.id}`;
+  const text = '';
+  shareA.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  modalImg.src = '';
+
+  const url = new URL(location.href);
+  url.searchParams.delete('img');
+  history.replaceState(null, '', url.toString());
+}
+
+function step(delta) {
+  const next = (current + delta + images.length) % images.length;
+  openModal(next);
+}
+
+async function init() {
+  const res = await fetch('./images.json', { cache: 'no-store' });
+  if (!res.ok) throw new Error('images.json not found');
+  images = await res.json();
+
+  grid.innerHTML = '';
+  images.forEach((item, idx) => {
+    const img = document.createElement('img');
+    img.src = item.src;
+    img.alt = item.alt || '';
+    img.loading = 'lazy';
+    img.className = 'thumb';
+    img.addEventListener('click', () => openModal(idx));
+    grid.appendChild(img);
   });
 
-function openModal(idx){
-  currentIndex = idx;
-  modalImg.src = images[currentIndex];
-  modal.classList.remove("hidden");
-  modal.setAttribute("aria-hidden", "false");
-
-  // 共有
-  shareX.href =
-    "https://twitter.com/intent/tweet?url=" +
-    encodeURIComponent(location.href);
+  // 直リンク表示（?img=1 みたいなの）
+  const url = new URL(location.href);
+  const id = Number(url.searchParams.get('img'));
+  if (id) {
+    const index = images.findIndex(x => x.id === id);
+    if (index >= 0) openModal(index);
+  }
 }
 
-function closeModal(){
-  modal.classList.add("hidden");
-  modal.setAttribute("aria-hidden", "true");
-  modalImg.src = "";
-  currentIndex = -1;
-}
+closeBtn.addEventListener('click', closeModal);
+prevBtn.addEventListener('click', () => step(-1));
+nextBtn.addEventListener('click', () => step(1));
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-function showPrev(){
-  if (!images.length) return;
-  currentIndex = (currentIndex - 1 + images.length) % images.length;
-  modalImg.src = images[currentIndex];
-}
-
-function showNext(){
-  if (!images.length) return;
-  currentIndex = (currentIndex + 1) % images.length;
-  modalImg.src = images[currentIndex];
-}
-
-closeBtn.onclick = closeModal;
-prevBtn.onclick = showPrev;
-nextBtn.onclick = showNext;
-
-modal.onclick = e => {
-  if (e.target === modal) closeModal();
-};
-
-document.addEventListener("keydown", (e) => {
-  if (modal.classList.contains("hidden")) return;
-  if (e.key === "Escape") closeModal();
-  if (e.key === "ArrowLeft") showPrev();
-  if (e.key === "ArrowRight") showNext();
+document.addEventListener('keydown', (e) => {
+  if (!modal.classList.contains('open')) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') step(-1);
+  if (e.key === 'ArrowRight') step(1);
 });
 
+init().catch(err => {
+  console.error(err);
+  grid.innerHTML = `<p style="padding:16px;">画像の読み込みに失敗しました（images.json / images フォルダを確認してね）</p>`;
+});
