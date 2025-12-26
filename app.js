@@ -1,3 +1,4 @@
+// グローバル変数
 let images = [];
 const carousel = document.getElementById("carousel");
 const msg = document.getElementById("msg");
@@ -6,70 +7,96 @@ const modalImg = document.getElementById("modal-img");
 const closeBtn = document.getElementById("close");
 const shareBtn = document.getElementById("share-btn");
 
-function showError(text){
+function showError(text) {
   msg.innerHTML = `<div class="error">${text}</div>`;
 }
 
-async function init(){
+// メイン処理
+async function init() {
   let res;
   try {
-    // ここは /images.json に変更推奨（前回のアドバイス通り）
+    // 絶対パスで確実に読み込む（Cloudflare Pages で安定）
     res = await fetch("/images.json", { cache: "no-store" });
-  } catch {
-    showError("images.json を読み込めませんでした（ネットワーク）");
+  } catch (e) {
+    showError("images.json を読み込めませんでした（ネットワークエラー）");
     return;
   }
-  if (!res.ok){
+
+  if (!res.ok) {
     showError(`images.json の読み込みに失敗しました（${res.status}）`);
     return;
   }
+
   let data;
   try {
     data = await res.json();
-  } catch {
-    showError("images.json がJSONとして壊れています");
+  } catch (e) {
+    showError("images.json が壊れています（JSON形式エラー）");
     return;
   }
-  if (!Array.isArray(data) || data.length === 0){
-    showError("images.json の中身が空です");
+
+  if (!Array.isArray(data) || data.length === 0) {
+    showError("images.json に画像データがありません");
     return;
   }
+
   images = data;
 
-  // カルーセルに画像を追加（ここが欠落していた部分！）
+  // カルーセルにサムネイルを追加
   carousel.innerHTML = "";
   images.forEach((item) => {
     const img = document.createElement("img");
     img.className = "thumb";
     img.loading = "lazy";
-    img.src = item.file;
-    img.alt = `thumb ${item.id}`;
+    img.src = item.file;           // images/1 (1).jpg など
+    img.alt = `illustration ${item.id}`;
 
-    // サムネイルクリック → モーダル表示
-    img.onclick = function() {
+    // クリックでモーダル表示
+    img.onclick = function () {
       modal.style.display = "block";
       setTimeout(() => modal.classList.add("show"), 10); // ふわっと出現
+
       modalImg.src = item.file;
 
-      // Share to X ボタン設定（URLだけ）
-      shareBtn.onclick = function() {
+      // Share to X ボタン：URLだけをツイート画面に渡す
+      shareBtn.onclick = function () {
         const shareUrl = `https://hou-gallery.pages.dev/image/${item.id}`;
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`, '_blank');
+        const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
+        window.open(twitterUrl, "_blank");
       };
     };
 
     carousel.appendChild(img);
   });
 
-  // URLパラメータ ?img=id で自動オープン（オプション）
+  // オプション：URLに ?img=1 のように指定して戻ってきたら自動でモーダルを開く
   const urlParams = new URLSearchParams(window.location.search);
-  const imgId = urlParams.get('img');
-  if (imgId) {
-    const item = images.find(i => i.id == imgId);
+  const openId = urlParams.get("img");
+  if (openId) {
+    const item = images.find((i) => i.id == openId);
     if (item) {
       modal.style.display = "block";
       setTimeout(() => modal.classList.add("show"), 10);
       modalImg.src = item.file;
-      shareBtn.onclick = function() {
+      shareBtn.onclick = function () {
         const shareUrl = `https://hou-gallery.pages.dev/image/${item.id}`;
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`, "_blank");
+      };
+    }
+  }
+}
+
+// モーダル閉じる処理
+closeBtn.onclick = function () {
+  modal.classList.remove("show");
+  setTimeout(() => (modal.style.display = "none"), 300);
+};
+
+modal.onclick = function (event) {
+  if (event.target === modal) {
+    closeBtn.onclick();
+  }
+};
+
+// 起動
+init();
