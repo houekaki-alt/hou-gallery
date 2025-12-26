@@ -1,88 +1,147 @@
 let images = [];
-let current = 0;
+let currentIndex = -1;
 
-const grid = document.getElementById('grid');
-const modal = document.getElementById('modal');
-const modalImg = document.getElementById('modalImg');
-const closeBtn = document.getElementById('close');
-const prevBtn = document.getElementById('prev');
-const nextBtn = document.getElementById('next');
-const shareA = document.getElementById('share');
+const grid = document.getElementById("grid");
+const msg = document.getElementById("msg");
 
-function openModal(i) {
-  current = i;
-  const item = images[current];
-  if (!item) return;
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modalImg");
+const btnClose = document.getElementById("close");
+const btnPrev = document.getElementById("prev");
+const btnNext = document.getElementById("next");
+const shareLink = document.getElementById("share");
 
-  modalImg.src = item.src;
-  modalImg.alt = item.alt || '';
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden', 'false');
+function showError(text){
+  msg.innerHTML = `<div class="error">${text}</div>`;
+}
 
-  // URLを ?img= にする（戻るボタンでも復元しやすい）
-  const url = new URL(location.href);
-  url.searchParams.set('img', String(item.id));
-  history.replaceState(null, '', url.toString());
+function parseImgFromHash(){
+  // #img=12
+  const h = location.hash || "";
+  const m = h.match(/img=(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+}
 
-  // X共有リンク（/image/ID を共有する）
+function setHash(id){
+  // 履歴が邪魔なら replaceState にする
+  history.replaceState(null, "", `/#img=${id}`);
+}
+
+function clearHash(){
+  history.replaceState(null, "", "/");
+}
+
+function openModalByIndex(idx){
+  if (!images.length) return;
+  if (idx < 0) idx = images.length - 1;
+  if (idx >= images.length) idx = 0;
+
+  currentIndex = idx;
+  const item = images[currentIndex];
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+
+  modalImg.src = item.file;
+  modalImg.alt = `image ${item.id}`;
+
+  setHash(item.id);
+
+  // 共有は /image/{id} を投げる（ここがPages FunctionsのOGP）
   const shareUrl = `${location.origin}/image/${item.id}`;
-  const text = '';
-  shareA.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
+  const intent = `https://x.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
+  shareLink.href = intent;
 }
 
-function closeModal() {
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden', 'true');
-  modalImg.src = '';
-
-  const url = new URL(location.href);
-  url.searchParams.delete('img');
-  history.replaceState(null, '', url.toString());
+function closeModal(){
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  modalImg.src = "";
+  currentIndex = -1;
+  clearHash();
 }
 
-function step(delta) {
-  const next = (current + delta + images.length) % images.length;
-  openModal(next);
+function go(delta){
+  if (currentIndex === -1) return;
+  openModalByIndex(currentIndex + delta);
 }
 
-async function init() {
-  const res = await fetch('./images.json', { cache: 'no-store' });
-  if (!res.ok) throw new Error('images.json not found');
-  images = await res.json();
+function bindEvents(){
+  btnClose.addEventListener("click", closeModal);
+  btnPrev.addEventListener("click", () => go(-1));
+  btnNext.addEventListener("click", () => go(1));
 
-  grid.innerHTML = '';
+  // 背景クリックで閉じる
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // キーボード
+  window.addEventListener("keydown", (e) => {
+    if (!modal.classList.contains("open")) return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "ArrowLeft") go(-1);
+    if (e.key === "ArrowRight") go(1);
+  });
+
+  // ハッシュ直打ちで開く（/#img=1）
+  window.addEventListener("hashchange", () => {
+    const id = parseImgFromHash();
+    if (!id) return;
+    const idx = images.findIndex(x => x.id === id);
+    if (idx !== -1) openModalByIndex(idx);
+  });
+}
+
+async function init(){
+  bindEvents();
+
+  let res;
+  try {
+    res = await fetch("./images.json", { cache: "no-store" });
+  } catch {
+    showError("images.json を読み込めませんでした（ネットワーク）");
+    return;
+  }
+
+  if (!res.ok){
+    showError(`images.json の読み込みに失敗しました（${res.status}）`);
+    return;
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    showError("images.json がJSONとして壊れています（カンマ/引用符の抜け等）");
+    return;
+  }
+
+  if (!Array.isArray(data) || data.length === 0){
+    showError("images.json の中身が空、または形式が違います（配列になってない）");
+    return;
+  }
+
+  images = data;
+
+  // grid 描画
+  grid.innerHTML = "";
   images.forEach((item, idx) => {
-    const img = document.createElement('img');
-    img.src = item.src;
-    img.alt = item.alt || '';
-    img.loading = 'lazy';
-    img.className = 'thumb';
-    img.addEventListener('click', () => openModal(idx));
+    const img = document.createElement("img");
+    img.className = "thumb";
+    img.loading = "lazy";
+    img.src = item.file;
+    img.alt = `thumb ${item.id}`;
+    img.addEventListener("click", () => openModalByIndex(idx));
     grid.appendChild(img);
   });
 
-  // 直リンク表示（?img=1 みたいなの）
-  const url = new URL(location.href);
-  const id = Number(url.searchParams.get('img'));
-  if (id) {
-    const index = images.findIndex(x => x.id === id);
-    if (index >= 0) openModal(index);
+  // 直アクセス対応
+  const id = parseImgFromHash();
+  if (id){
+    const idx = images.findIndex(x => x.id === id);
+    if (idx !== -1) openModalByIndex(idx);
   }
 }
 
-closeBtn.addEventListener('click', closeModal);
-prevBtn.addEventListener('click', () => step(-1));
-nextBtn.addEventListener('click', () => step(1));
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-document.addEventListener('keydown', (e) => {
-  if (!modal.classList.contains('open')) return;
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'ArrowLeft') step(-1);
-  if (e.key === 'ArrowRight') step(1);
-});
-
-init().catch(err => {
-  console.error(err);
-  grid.innerHTML = `<p style="padding:16px;">画像の読み込みに失敗しました（images.json / images フォルダを確認してね）</p>`;
-});
+init();
