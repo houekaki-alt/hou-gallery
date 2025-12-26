@@ -1,23 +1,126 @@
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #f6f3f1; color: #222; }
-.topbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; }
-.brand { font-size: 28px; letter-spacing: 0.5px; }
-.icons a { margin-left: 12px; text-decoration: none; color: #222; opacity: .8; }
-.wrap { padding: 0 22px 40px; }
-.about { max-width: 560px; line-height: 1.8; opacity: .7; }
-.btn { display: inline-block; padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(0,0,0,.15); text-decoration: none; color: #222; }
+:root{
+  --bg:#f6f3f1;
+  --text:#222;
+  --muted:rgba(0,0,0,.55);
+  --card:rgba(255,255,255,.85);
+  --shadow:0 10px 30px rgba(0,0,0,.12);
+}
 
-.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); margin-top: 24px; }
-.thumb { width: 100%; height: 260px; object-fit: cover; border-radius: 14px; cursor: pointer; background: rgba(0,0,0,.04); }
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-/* モーダルはデフォで非表示。open のときだけ出る */
-.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(255,255,255,.7); z-index: 9999; }
-.modal.open { display: flex; }
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+}
 
-.modalImg { max-width: min(92vw, 720px); max-height: 86vh; border-radius: 18px; box-shadow: 0 8px 30px rgba(0,0,0,.12); background: white; }
+.brand{
+  font-size:28px;
+  letter-spacing:.5px;
+  note: none;
+}
 
-.close { position: fixed; top: 18px; right: 18px; border: none; background: rgba(255,255,255,.85); padding: 10px 14px; border-radius: 12px; cursor: pointer; }
-.nav { position: fixed; top: 50%; transform: translateY(-50%); border: none; background: rgba(255,255,255,.85); padding: 10px 14px; border-radius: 999px; cursor: pointer; }
-.prev { left: 18px; }
-.next { right: 18px; }
+.icons a{
+  margin-left:12px;
+  text-decoration:none;
+  color:var(--text);
+  opacity:.75;
+}
 
-.share { position: fixed; bottom: 16px; right: 18px; color: #1d4ed8; text-decoration: underline; background: rgba(255,255,255,.85); padding: 8px 10px; border-radius: 10px; }
+.wrap{padding:0 22px 40px}
+.about{max-width:640px; line-height:1.8; color:var(--muted)}
+.btn{
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.18);
+  text-decoration:none;
+  color:var(--text);
+  background:rgba(255,255,255,.55);
+}
+
+.grid{
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  margin-top:24px;
+}
+
+.thumb{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  border-radius:14px;
+  cursor:pointer;
+  background:rgba(0,0,0,.04);
+}
+
+/* modal */
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.72);
+  z-index:9999;
+}
+.modal.open{display:flex}
+
+.modalImg{
+  max-width:min(92vw,720px);
+  max-height:86vh;
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  background:white;
+}
+
+.close{
+  position:fixed;
+  top:18px;
+  right:18px;
+  border:none;
+  background:var(--card);
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.nav{
+  position:fixed;
+  top:50%;
+  transform:translateY(-50%);
+  border:none;
+  background:var(--card);
+  padding:10px 14px;
+  border-radius:999px;
+  cursor:pointer;
+}
+.prev{left:18px}
+.next{right:18px}
+
+.share{
+  position:fixed;
+  bottom:16px;
+  right:18px;
+  background:var(--card);
+  padding:8px 10px;
+  border-radius:10px;
+  text-decoration:underline;
+  color:#1d4ed8;
+}
+.error{
+  margin-top:20px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(0,0,0,.12);
+}
