@@ -1,5 +1,5 @@
 let images = [];
-let currentIndex = 0;  // 現在表示中の画像のインデックス
+let currentIndex = 0;
 
 const carousel = document.getElementById("carousel");
 const msg = document.getElementById("msg");
@@ -8,7 +8,6 @@ const modalImg = document.getElementById("modal-img");
 const closeBtn = document.getElementById("close");
 const shareBtn = document.getElementById("share-btn");
 
-// 左右矢印ボタン（動的に追加）
 let prevBtn, nextBtn;
 
 function showError(text) {
@@ -21,14 +20,12 @@ function openModal(index) {
   setTimeout(() => modal.classList.add("show"), 10);
   modalImg.src = images[currentIndex].file;
 
-  // Shareボタン更新
   shareBtn.onclick = function () {
     const shareUrl = `https://hou-gallery.pages.dev/image/${images[currentIndex].id}`;
     const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
     window.open(twitterUrl, "_blank");
   };
 
-  // 矢印ボタン作成（初回のみ）
   if (!prevBtn) {
     prevBtn = document.createElement("div");
     prevBtn.className = "prev";
@@ -69,6 +66,42 @@ function updateShareBtn() {
   };
 }
 
+// ★新機能：トップページのog:imageを自動で最新イラストに設定（html触らずに！！）
+function setDynamicOgImage() {
+  if (images.length === 0) return;
+  // 最新の画像（配列の最後）を選択
+  const latestImage = images[images.length - 1];
+  const ogImageUrl = `https://hou-gallery.pages.dev/${latestImage.file}`;
+
+  // 既存のog:imageを上書き
+  let ogImageTag = document.querySelector('meta[property="og:image"]');
+  if (ogImageTag) {
+    ogImageTag.setAttribute("content", ogImageUrl);
+  } else {
+    // なければ作成
+    ogImageTag = document.createElement("meta");
+    ogImageTag.setAttribute("property", "og:image");
+    ogImageTag.setAttribute("content", ogImageUrl);
+    document.head.appendChild(ogImageTag);
+  }
+
+  // widthとheightも設定（Xプレビュー最適化）
+  let widthTag = document.querySelector('meta[property="og:image:width"]');
+  if (!widthTag) {
+    widthTag = document.createElement("meta");
+    widthTag.setAttribute("property", "og:image:width");
+    widthTag.setAttribute("content", "1200");
+    document.head.appendChild(widthTag);
+  }
+  let heightTag = document.querySelector('meta[property="og:image:height"]');
+  if (!heightTag) {
+    heightTag = document.createElement("meta");
+    heightTag.setAttribute("property", "og:image:height");
+    heightTag.setAttribute("content", "630");
+    document.head.appendChild(heightTag);
+  }
+}
+
 async function init() {
   let res;
   try {
@@ -106,12 +139,14 @@ async function init() {
     img.src = item.file;
     img.alt = `illustration ${item.id}`;
 
-    img.onclick = () => openModal(index);  // インデックスを渡す
+    img.onclick = () => openModal(index);
 
     carousel.appendChild(img);
   });
 
-  // キーボード左右キーでも操作
+  // ★最新イラストをog:imageに自動設定（これでhtml触らなくてOK！！）
+  setDynamicOgImage();
+
   document.addEventListener("keydown", (e) => {
     if (modal.style.display === "block") {
       if (e.key === "ArrowLeft") prevImage();
