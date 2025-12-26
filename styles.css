@@ -1,4 +1,79 @@
-/* モーダルスタイル（ふわっと表示・非表示） */
+:root{
+  --bg:#f6f3f1;
+  --text:#222;
+  --muted:rgba(0,0,0,.55);
+  --card:rgba(255,255,255,.85);
+  --shadow:0 10px 30px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+}
+.brand{
+  font-size:28px;
+  letter-spacing:.5px;
+}
+.icons a{
+  margin-left:12px;
+  text-decoration:none;
+  color:var(--text);
+  opacity:.75;
+}
+.wrap{padding:0 22px 40px}
+.about{max-width:640px; line-height:1.8; color:var(--muted)}
+.btn{
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.18);
+  text-decoration:none;
+  color:var(--text);
+  background:rgba(255,255,255,.55);
+}
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 14px;
+  margin-top: 24px;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.carousel::-webkit-scrollbar {
+  height: 8px;
+}
+.carousel::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+}
+.thumb{
+  height: 320px;
+  width: auto;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 14px;
+  cursor: pointer;
+  background: rgba(0,0,0,.04);
+  scroll-snap-align: start;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.thumb:hover {
+  transform: scale(1.05);
+}
+
+/* モーダル（最初は確実に非表示 + ふわっと出現） */
 .modal {
   display: none;
   position: fixed;
@@ -18,9 +93,12 @@
 .modal-content {
   margin: auto;
   display: block;
-  max-width: 80%;
-  max-height: 80%;
-  margin-top: 10vh;
+  max-width: 90%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.3);
+  margin-top: 5vh;
 }
 #close {
   position: absolute;
@@ -33,14 +111,21 @@
 }
 #share-btn {
   position: absolute;
-  bottom: 20px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 20px;
+  padding: 12px 24px;
   background: #1da1f2;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 999px;
   cursor: pointer;
   font-size: 16px;
+}
+.error{
+  margin-top:20px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(0,0,0,.12);
 }
