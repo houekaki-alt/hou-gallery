@@ -11,7 +11,7 @@ const nextBtn = document.querySelector(".nav.next");
 let images = [];
 let currentIndex = -1;
 
-fetch("images.json")
+const res = await fetch('./images.json');
   .then(r => r.json())
   .then(list => {
     images = list;
@@ -79,3 +79,4 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") showPrev();
   if (e.key === "ArrowRight") showNext();
 });
+
