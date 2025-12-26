@@ -1,45 +1,29 @@
-let images = [];
-const carousel = document.getElementById("carousel");  // grid を carousel に
-const msg = document.getElementById("msg");
+// モーダル関連の要素を取得
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modal-img");
+const closeBtn = document.getElementById("close");
+const shareBtn = document.getElementById("share-btn");
 
-function showError(text){
-  msg.innerHTML = `<div class="error">${text}</div>`;
-}
+// サムネイルクリック → モーダル表示
+img.onclick = function() {
+  modal.style.display = "block";
+  setTimeout(() => modal.classList.add("show"), 10); // ふわっと出現
+  modalImg.src = item.file;
 
-async function init(){
-  let res;
-  try {
-    res = await fetch("./images.json", { cache: "no-store" });
-  } catch {
-    showError("images.json を読み込めませんでした（ネットワーク）");
-    return;
+  // Share to X ボタン：URLだけをツイート画面に渡す
+  shareBtn.onclick = function() {
+    const shareUrl = `https://hou-gallery.pages.dev/image/${item.id}`;
+    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`, '_blank');
+  };
+};
+
+// ×ボタンや背景クリックでモーダル閉じる
+closeBtn.onclick = function() {
+  modal.classList.remove("show");
+  setTimeout(() => modal.style.display = "none", 300);
+};
+modal.onclick = function(event) {
+  if (event.target === modal) {
+    closeBtn.onclick();
   }
-  if (!res.ok){
-    showError(`images.json の読み込みに失敗しました（${res.status}）`);
-    return;
-  }
-  let data;
-  try {
-    data = await res.json();
-  } catch {
-    showError("images.json がJSONとして壊れています（カンマ/引用符の抜け等）");
-    return;
-  }
-  if (!Array.isArray(data) || data.length === 0){
-    showError("images.json の中身が空、または形式が違います（配列になってない）");
-    return;
-  }
-  images = data;
-  // carousel 描画
-  carousel.innerHTML = "";
-  images.forEach((item) => {  // idx 不要
-    const img = document.createElement("img");
-    img.className = "thumb";
-    img.loading = "lazy";
-    img.src = item.file;
-    img.alt = `thumb ${item.id}`;
-    // クリックイベント削除（モーダルなし）
-    carousel.appendChild(img);
-  });
-}
-init();
+};
