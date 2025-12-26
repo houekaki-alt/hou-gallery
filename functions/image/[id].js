@@ -1,20 +1,11 @@
 export async function onRequest({ params, request }) {
   const id = params.id;
-
-  // 例: id=1 → "1 (1).jpg"
-  const filename = `1 (${id}).jpg`;
-
-  // ★ここが肝：スペースや()をURLとして安全にする
+  // ★永遠に変更不要！！ スペースなしファイル名専用
+  const filename = `1(${id}).jpg`;
   const encoded = encodeURIComponent(filename);
-
-  // og:image は絶対URLで
   const imageUrl = `https://hou-gallery.pages.dev/images/${encoded}`;
-
-  // 共有用URL（これをXに貼ると、その画像がサムネになる想定）
   const pageUrl = `https://hou-gallery.pages.dev/image/${id}`;
 
-  // 人間が開いたときに真っ白は寂しいので、軽く画像も表示する
-  // ※クローラー（Xの取得役）にもOGPが読める
   const html = `<!doctype html>
 <html lang="ja">
 <head>
@@ -24,10 +15,8 @@ export async function onRequest({ params, request }) {
   <meta property="og:url" content="${pageUrl}" />
   <meta property="og:image" content="${imageUrl}" />
   <meta name="twitter:card" content="summary_large_image" />
-
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>@hou_enj/illustration</title>
-
   <style>
     body{margin:0;display:grid;place-items:center;min-height:100vh;background:#f6f2ee}
     img{max-width:min(900px,92vw);max-height:min(92vh,1200px);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.12)}
@@ -39,7 +28,6 @@ export async function onRequest({ params, request }) {
   <img src="/images/${encoded}" alt="image ${id}">
 </body>
 </html>`;
-
   return new Response(html, {
     headers: { "content-type": "text/html; charset=utf-8" },
   });
