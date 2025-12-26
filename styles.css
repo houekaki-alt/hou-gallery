@@ -75,7 +75,7 @@ body{
   }
 }
 
-/* モーダル */
+/* モーダル（修正ポイント：縦長画像が切れないように） */
 .modal {
   display: none;
   position: fixed;
@@ -84,10 +84,11 @@ body{
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: auto;            /* 超縦長画像はスクロール可能に */
   background-color: rgba(0,0,0,0.9);
   opacity: 0;
   transition: opacity 0.3s ease;
+  padding: 20px 0;           /* 上下余白で指スクロールしやすく */
 }
 .modal.show {
   opacity: 1;
@@ -95,12 +96,13 @@ body{
 .modal-content {
   margin: auto;
   display: block;
-  max-width: 90%;
-  max-height: 85vh;
-  object-fit: contain;
+  max-width: 95vw;           /* 横幅を広く */
+  max-height: 90vh;          /* 縦を画面の90%まで */
+  height: auto;              /* 高さ自動調整（超重要！） */
+  width: auto;               /* 幅自動（アスペクト比維持） */
+  object-fit: contain;       /* 画像全体が見える（切れない！） */
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,.3);
-  margin-top: 5vh;
 }
 
 /* 左右矢印ボタン */
