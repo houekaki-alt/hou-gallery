@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>@hou_enj/illustration</title>
-  <!-- トップのOGP（固定でOK）。画像ごとのOGPは /image/{id} が担当 -->
+  <!-- トップページのOGP（固定）。個別画像のOGPは /image/{id} が担当 -->
   <meta property="og:title" content="苞 イラストギャラリー">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hou-gallery.pages.dev/">
@@ -32,9 +32,16 @@
       </div>
     </div>
     <div id="msg"></div>
-    <div id="carousel" class="carousel"></div>  <!-- grid を carousel に変更 -->
+    <div id="carousel" class="carousel"></div>
   </div>
-  <!-- モーダルは削除（必要なら残して） -->
+
+  <!-- モーダル（クリックでふわっと表示） -->
+  <div id="modal" class="modal">
+    <span id="close">×</span>
+    <img id="modal-img" class="modal-content">
+    <button id="share-btn">Share to X</button>
+  </div>
+
   <script src="./app.js"></script>
 </body>
 </html>
