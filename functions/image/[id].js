@@ -1,6 +1,6 @@
 export async function onRequest({ params, request }) {
   const id = params.id;
-  // ★永遠に変更不要！！ スペースなしファイル名専用
+  // ★スペースなしファイル名に固定！！（1(64).jpg など）
   const filename = `1(${id}).jpg`;
   const encoded = encodeURIComponent(filename);
   const imageUrl = `https://hou-gallery.pages.dev/images/${encoded}`;
