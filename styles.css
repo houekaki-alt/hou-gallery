@@ -100,7 +100,7 @@ body{
   max-height: 90vh;          /* 縦を画面の90%まで */
   height: auto;              /* 高さ自動調整（超重要！） */
   width: auto;               /* 幅自動（アスペクト比維持） */
-  object-fit: contain;       /* 画像全体が見える（切れない！） */
+  object-fit: contain;       /* 画像全体が見える */
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,.3);
 }
