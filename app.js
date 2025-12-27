@@ -66,26 +66,24 @@ function updateShareBtn() {
   };
 }
 
-// ★新機能：トップページのog:imageを自動で最新イラストに設定（html触らずに！！）
+// トップページのog:imageを自動で最新イラストに設定（html触らず）
 function setDynamicOgImage() {
   if (images.length === 0) return;
-  // 最新の画像（配列の最後）を選択
+  // jsonの最後 = 最新イラスト
   const latestImage = images[images.length - 1];
   const ogImageUrl = `https://hou-gallery.pages.dev/${latestImage.file}`;
 
-  // 既存のog:imageを上書き
   let ogImageTag = document.querySelector('meta[property="og:image"]');
   if (ogImageTag) {
     ogImageTag.setAttribute("content", ogImageUrl);
   } else {
-    // なければ作成
     ogImageTag = document.createElement("meta");
     ogImageTag.setAttribute("property", "og:image");
     ogImageTag.setAttribute("content", ogImageUrl);
     document.head.appendChild(ogImageTag);
   }
 
-  // widthとheightも設定（Xプレビュー最適化）
+  // width/height設定
   let widthTag = document.querySelector('meta[property="og:image:width"]');
   if (!widthTag) {
     widthTag = document.createElement("meta");
@@ -110,12 +108,10 @@ async function init() {
     showError("images.json を読み込めませんでした（ネットワークエラー）");
     return;
   }
-
   if (!res.ok) {
     showError(`images.json の読み込みに失敗しました（${res.status}）`);
     return;
   }
-
   let data;
   try {
     data = await res.json();
@@ -123,7 +119,6 @@ async function init() {
     showError("images.json が壊れています（JSON形式エラー）");
     return;
   }
-
   if (!Array.isArray(data) || data.length === 0) {
     showError("images.json に画像データがありません");
     return;
@@ -138,13 +133,10 @@ async function init() {
     img.loading = "lazy";
     img.src = item.file;
     img.alt = `illustration ${item.id}`;
-
     img.onclick = () => openModal(index);
-
     carousel.appendChild(img);
   });
 
-  // ★最新イラストをog:imageに自動設定（これでhtml触らなくてOK！！）
   setDynamicOgImage();
 
   document.addEventListener("keydown", (e) => {
