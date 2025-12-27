@@ -1,7 +1,7 @@
 export async function onRequest({ params, request }) {
   const id = params.id;
   
-  const filename = `1(${id}).jpg`;
+  const filename = `1 (${id}).jpg`;
   const encoded = encodeURIComponent(filename);
   const imageUrl = `https://hou-gallery.pages.dev/images/${encoded}`;
   const pageUrl = `https://hou-gallery.pages.dev/image/${id}`;
@@ -28,6 +28,7 @@ export async function onRequest({ params, request }) {
   <img src="/images/${encoded}" alt="image ${id}">
 </body>
 </html>`;
+
   return new Response(html, {
     headers: { "content-type": "text/html; charset=utf-8" },
   });
