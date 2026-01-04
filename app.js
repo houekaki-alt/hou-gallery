@@ -1,5 +1,8 @@
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
 
+// ★ここはあなたの想定通り「リンク」＝APIのベースURLでOK
+const API_BASE = "https://reactions-api.hou-ekaki.workers.dev";
+
 let images = [];
 let currentIndex = 0;
 
@@ -20,60 +23,109 @@ document.addEventListener("DOMContentLoaded", () => {
     if (msg) msg.innerHTML = `<div class="error">${text}</div>`;
   }
 
-  /* ===== localStorage ===== */
-  const storageKey = (id) => `reactions_${id}`;
+  // ===== API =====
+  async function apiGet(imgId) {
+    const res = await fetch(`${API_BASE}/?img=${encodeURIComponent(imgId)}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`GET failed ${res.status}`);
+    return await res.json();
+  }
 
-  function loadReactions(id) {
-    try {
-      return JSON.parse(localStorage.getItem(storageKey(id))) || {};
-    } catch {
-      return {};
+  async function apiPost(imgId, emoji) {
+    const res = await fetch(`${API_BASE}/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ img: imgId, emoji }),
+    });
+    if (!res.ok) throw new Error(`POST failed ${res.status}`);
+    return await res.json();
+  }
+
+  function blankCounts() {
+    const obj = {};
+    FIXED_REACTIONS.forEach((e) => (obj[e] = 0));
+    return obj;
+  }
+
+  function normalizeFromApi(data) {
+    // reactions: [{emoji,count}] -> {emoji:count}
+    const map = blankCounts();
+
+    const list = data?.reactions;
+    if (Array.isArray(list)) {
+      for (const r of list) {
+        const emoji = r?.emoji === "❤" ? "❤️" : r?.emoji;
+        if (!emoji || !FIXED_REACTIONS.includes(emoji)) continue;
+        map[emoji] = Number(r.count) || 0;
+      }
     }
+    return map;
   }
 
-  function saveReactions(id, data) {
-    localStorage.setItem(storageKey(id), JSON.stringify(data));
-  }
-
-  /* ===== 描画（固定3種） ===== */
-  function renderReactions(postId, container, type) {
+  function renderReactions(postId, container, type, countsMap) {
     if (!container) return;
 
-    const data = loadReactions(postId);
+    const data = countsMap || blankCounts();
     container.innerHTML = "";
 
     FIXED_REACTIONS.forEach((emoji) => {
       const count = data[emoji] || 0;
 
       const item = document.createElement("div");
-      item.className = (type === "modal") ? "reaction-item" : "thumb-reaction-item";
+      item.className = type === "modal" ? "reaction-item" : "thumb-reaction-item";
       item.innerHTML = `${emoji}<span>${count}</span>`;
 
-      item.addEventListener("click", (e) => {
+      item.addEventListener("click", async (e) => {
         e.stopPropagation();
 
+        // 楽観更新（即反映）
         data[emoji] = (data[emoji] || 0) + 1;
-        saveReactions(postId, data);
+        syncAllUI(postId, data);
 
-        // モーダル更新
-        if (reactionsContainer && modal && modal.style.display === "block") {
-          renderReactions(postId, reactionsContainer, "modal");
-        }
-
-        // 一覧側の該当カード更新
-        const thumbAreas = document.querySelectorAll(".thumb-reactions-container");
-        images.forEach((it, idx) => {
-          if (it.id === postId && thumbAreas[idx]) {
-            renderReactions(postId, thumbAreas[idx], "thumb");
+        try {
+          const ret = await apiPost(postId, emoji);
+          // サーバー確定値で上書き（ズレ防止）
+          const fixed = Number(ret?.count);
+          if (Number.isFinite(fixed)) {
+            data[emoji] = fixed;
+            syncAllUI(postId, data);
+          } else {
+            // 返り値が想定外でも表示は維持
+            syncAllUI(postId, data);
           }
-        });
+        } catch (err) {
+          // 失敗したら戻す（好みで“戻さない”運用にもできる）
+          data[emoji] = Math.max(0, (data[emoji] || 1) - 1);
+          syncAllUI(postId, data);
+          console.warn(err);
+        }
       });
 
       container.appendChild(item);
     });
   }
 
-  /* ===== モーダル ===== */
+  function syncAllUI(postId, countsMap) {
+    // 一覧の該当カード更新
+    const thumbAreas = document.querySelectorAll(".thumb-reactions-container");
+    images.forEach((it, idx) => {
+      if (it.id === postId && thumbAreas[idx]) {
+        renderReactions(postId, thumbAreas[idx], "thumb", countsMap);
+      }
+    });
+
+    // モーダルが開いていて同じIDなら更新
+    if (modal && modal.style.display === "block") {
+      const currentId = images[currentIndex]?.id;
+      if (currentId === postId && reactionsContainer) {
+        renderReactions(postId, reactionsContainer, "modal", countsMap);
+      }
+    }
+  }
+
+  // ===== Share =====
   function updateShareLink() {
     if (!shareBtn) return;
 
@@ -87,18 +139,29 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  function openModal(index) {
+  // ===== Modal =====
+  async function openModal(index) {
     if (!modal || !modalImg) return;
 
     currentIndex = index;
-
     modalImg.src = images[currentIndex].file;
+
     modal.style.display = "block";
     modal.setAttribute("aria-hidden", "false");
     setTimeout(() => modal.classList.add("show"), 10);
 
-    renderReactions(images[currentIndex].id, reactionsContainer, "modal");
     updateShareLink();
+
+    // サーバー最新を取得して表示
+    try {
+      const data = await apiGet(images[currentIndex].id);
+      const map = normalizeFromApi(data);
+      renderReactions(images[currentIndex].id, reactionsContainer, "modal", map);
+      syncAllUI(images[currentIndex].id, map);
+    } catch (e) {
+      renderReactions(images[currentIndex].id, reactionsContainer, "modal", blankCounts());
+      console.warn(e);
+    }
   }
 
   function closeModal() {
@@ -108,23 +171,41 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => (modal.style.display = "none"), 250);
   }
 
-  function prevImage() {
+  async function prevImage() {
     if (!modalImg) return;
     currentIndex = (currentIndex - 1 + images.length) % images.length;
     modalImg.src = images[currentIndex].file;
-    renderReactions(images[currentIndex].id, reactionsContainer, "modal");
     updateShareLink();
+
+    try {
+      const data = await apiGet(images[currentIndex].id);
+      const map = normalizeFromApi(data);
+      renderReactions(images[currentIndex].id, reactionsContainer, "modal", map);
+      syncAllUI(images[currentIndex].id, map);
+    } catch (e) {
+      renderReactions(images[currentIndex].id, reactionsContainer, "modal", blankCounts());
+      console.warn(e);
+    }
   }
 
-  function nextImage() {
+  async function nextImage() {
     if (!modalImg) return;
     currentIndex = (currentIndex + 1) % images.length;
     modalImg.src = images[currentIndex].file;
-    renderReactions(images[currentIndex].id, reactionsContainer, "modal");
     updateShareLink();
+
+    try {
+      const data = await apiGet(images[currentIndex].id);
+      const map = normalizeFromApi(data);
+      renderReactions(images[currentIndex].id, reactionsContainer, "modal", map);
+      syncAllUI(images[currentIndex].id, map);
+    } catch (e) {
+      renderReactions(images[currentIndex].id, reactionsContainer, "modal", blankCounts());
+      console.warn(e);
+    }
   }
 
-  /* ===== 初期化 ===== */
+  // ===== 初期化 =====
   async function init() {
     if (!carousel) {
       showError("carousel が見つかりません（index.html の id='carousel' を確認）");
@@ -160,6 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     images = data;
     carousel.innerHTML = "";
 
+    // まず0で表示（体感速度）
     images.forEach((item, index) => {
       const card = document.createElement("div");
       card.className = "thumb-container";
@@ -182,12 +264,32 @@ document.addEventListener("DOMContentLoaded", () => {
       card.appendChild(bar);
       carousel.appendChild(card);
 
-      // 初期 0 表示
-      renderReactions(item.id, area, "thumb");
+      renderReactions(item.id, area, "thumb", blankCounts());
     });
+
+    // あとからサーバー値を流し込む（同時リクエストは控えめに）
+    const concurrency = 6;
+    let i = 0;
+
+    async function worker() {
+      while (i < images.length) {
+        const idx = i++;
+        const it = images[idx];
+
+        try {
+          const data = await apiGet(it.id);
+          const map = normalizeFromApi(data);
+          syncAllUI(it.id, map);
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+    }
+
+    await Promise.all(Array.from({ length: concurrency }, worker));
   }
 
-  /* ===== イベント ===== */
+  // ===== Events =====
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevImage(); });
   if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextImage(); });
