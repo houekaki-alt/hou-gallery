@@ -120,13 +120,15 @@ function openModal(index) {
     });
 
  
-  const url = new URL(location.href);
-  url.searchParams.set("i", String(index + 1));
-  shareBtn.onclick = () => {
-    const shareText = "苞さんのイラストを見ました！";
-    const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url.toString())}`;
-    window.open(shareUrl, "_blank", "noopener");
-  };
+
+const item = images[currentIndex];
+shareBtn.onclick = () => {
+  const sharePage = `${location.origin}/share/${encodeURIComponent(item.id)}`;
+  const shareText = "苞さんのイラストを見ました！";
+  const xIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(sharePage)}`;
+  window.open(xIntent, "_blank", "noopener");
+};
+
 }
 
 function closeModal() {
