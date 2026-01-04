@@ -49,7 +49,6 @@ body{
   margin-top: 20px;
   padding: 0 10px;
 }
-
 .thumb{
   width: 100%;
   height: 380px;
@@ -64,7 +63,6 @@ body{
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,.2);
 }
-
 @media (max-width: 768px) {
   .carousel {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -75,7 +73,7 @@ body{
   }
 }
 
-/* モーダル（修正ポイント：縦長画像が切れないように） */
+/* モーダル */
 .modal {
   display: none;
   position: fixed;
@@ -84,11 +82,11 @@ body{
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;            /* 超縦長画像はスクロール可能に */
+  overflow: auto;
   background-color: rgba(0,0,0,0.9);
   opacity: 0;
   transition: opacity 0.3s ease;
-  padding: 20px 0;           /* 上下余白で指スクロールしやすく */
+  padding: 20px 0;
 }
 .modal.show {
   opacity: 1;
@@ -96,16 +94,14 @@ body{
 .modal-content {
   margin: auto;
   display: block;
-  max-width: 95vw;           /* 横幅を広く */
-  max-height: 90vh;          /* 縦を画面の90%まで */
-  height: auto;              /* 高さ自動調整（超重要！） */
-  width: auto;               /* 幅自動（アスペクト比維持） */
-  object-fit: contain;       /* 画像全体が見える */
+  max-width: 95vw;
+  max-height: 90vh;
+  height: auto;
+  width: auto;
+  object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0,0,0,.3);
 }
-
-/* 左右矢印ボタン */
 .prev, .next {
   cursor: pointer;
   position: absolute;
@@ -126,7 +122,6 @@ body{
 }
 .prev { left: 20px; }
 .next { right: 20px; }
-
 #close {
   position: absolute;
   top: 15px;
@@ -149,6 +144,62 @@ body{
   cursor: pointer;
   font-size: 16px;
 }
+
+/* リアクションバー */
+.reaction-bar {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  backdrop-filter: blur(8px);
+  max-width: 90vw;
+}
+
+.reactions-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.reaction-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.more-emoji-btn {
+  font-size: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 8px;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.emoji-picker-container {
+  position: absolute;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  z-index: 100;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
 .error{
   margin-top:20px;
   padding:12px 14px;
