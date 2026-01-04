@@ -43,7 +43,7 @@ function openModal(index) {
     modal.appendChild(nextBtn);
   }
 
-  renderReactionBar(images[currentIndex].id);
+  renderReactionBar(images[currentIndex].id, reactionsContainer);
   initEmojiPicker();
 }
 
@@ -57,14 +57,14 @@ function prevImage() {
   currentIndex = (currentIndex - 1 + images.length) % images.length;
   modalImg.src = images[currentIndex].file;
   updateShareBtn();
-  renderReactionBar(images[currentIndex].id);
+  renderReactionBar(images[currentIndex].id, reactionsContainer);
 }
 
 function nextImage() {
   currentIndex = (currentIndex + 1) % images.length;
   modalImg.src = images[currentIndex].file;
   updateShareBtn();
-  renderReactionBar(images[currentIndex].id);
+  renderReactionBar(images[currentIndex].id, reactionsContainer);
 }
 
 function updateShareBtn() {
@@ -129,15 +129,41 @@ async function init() {
   }
   images = data;
   carousel.innerHTML = "";
+
   images.forEach((item, index) => {
+    const container = document.createElement("div");
+    container.className = "thumb-container";
+
     const img = document.createElement("img");
     img.className = "thumb";
     img.loading = "lazy";
     img.src = item.file;
     img.alt = `illustration ${item.id}`;
     img.onclick = () => openModal(index);
-    carousel.appendChild(img);
+
+    // 一覧用のリアクションバー作成
+    const thumbBar = document.createElement("div");
+    thumbBar.className = "thumb-reaction-bar";
+    const thumbContainer = document.createElement("div");
+    thumbContainer.className = "thumb-reactions-container";
+    const thumbMore = document.createElement("button");
+    thumbMore.className = "thumb-more-btn";
+    thumbMore.innerHTML = "⋯";
+    thumbMore.onclick = (e) => {
+      e.stopPropagation();
+      currentIndex = index;
+      initEmojiPickerForThumb(item.id, thumbMore);
+    };
+    thumbBar.appendChild(thumbContainer);
+    thumbBar.appendChild(thumbMore);
+
+    renderReactionBar(item.id, thumbContainer);  // 小さいバーに表示
+
+    container.appendChild(img);
+    container.appendChild(thumbBar);
+    carousel.appendChild(container);
   });
+
   setDynamicOgImage();
 
   document.addEventListener("keydown", (e) => {
@@ -161,30 +187,41 @@ function saveReactions(postId, reactions) {
   localStorage.setItem(key, JSON.stringify(reactions));
 }
 
-function renderReactionBar(postId) {
-  reactionsContainer.innerHTML = '';
+// 共通のバー描画関数（モーダル用と一覧用両方対応）
+function renderReactionBar(postId, container) {
+  container.innerHTML = '';
   const reactions = getReactions(postId);
 
-  // 絵文字をUnicode順に並べて表示
   Object.keys(reactions)
     .sort()
     .forEach(emoji => {
       const item = document.createElement("div");
-      item.className = "reaction-item";
+      item.className = container.classList.contains("thumb-reactions-container") ? "thumb-reaction-item" : "reaction-item";
       item.innerHTML = `${emoji}<span>${reactions[emoji]}</span>`;
-      item.onclick = () => addReaction(postId, emoji);
-      reactionsContainer.appendChild(item);
+      item.onclick = (e) => {
+        e.stopPropagation();
+        addReaction(postId, emoji);
+      };
+      container.appendChild(item);
     });
 
-  // 常にバーを表示
-  reactionBar.style.display = "flex";
+  // バーを常に表示
+  container.parentElement.style.display = "flex";
 }
 
 function addReaction(postId, emoji) {
   const reactions = getReactions(postId);
   reactions[emoji] = (reactions[emoji] || 0) + 1;
   saveReactions(postId, reactions);
-  renderReactionBar(postId);
+
+  // すべての表示を更新
+  renderReactionBar(postId, reactionsContainer);  // モーダル
+  const thumbContainers = document.querySelectorAll('.thumb-reactions-container');
+  images.forEach((item, idx) => {
+    if (item.id === postId && thumbContainers[idx]) {
+      renderReactionBar(postId, thumbContainers[idx]);
+    }
+  });
 }
 
 async function initEmojiPicker() {
@@ -215,7 +252,17 @@ async function initEmojiPicker() {
   };
 }
 
-// イベント
+// 一覧の⋯ボタン用ピッカー（モーダルと同じピッカー再利用）
+function initEmojiPickerForThumb(postId, button) {
+  currentIndex = images.findIndex(img => img.id === postId);
+  initEmojiPicker();
+  emojiPickerContainer.style.display = 'block';
+  // 位置をボタン近くに調整（簡易）
+  emojiPickerContainer.style.bottom = 'auto';
+  emojiPickerContainer.style.top = `${button.getBoundingClientRect().top + window.scrollY - 400}px`;
+  emojiPickerContainer.style.left = '50%';
+}
+
 closeBtn.onclick = closeModal;
 modal.onclick = function (event) {
   if (event.target === modal) closeModal();

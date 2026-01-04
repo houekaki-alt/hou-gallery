@@ -41,13 +41,15 @@ body{
   background:rgba(255,255,255,.55);
 }
 
-/* グリッドレイアウト */
 .carousel {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
   margin-top: 20px;
   padding: 0 10px;
+}
+.thumb-container {
+  position: relative;
 }
 .thumb{
   width: 100%;
@@ -63,6 +65,44 @@ body{
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,.2);
 }
+
+/* 一覧用のリアクションバー（小さめ） */
+.thumb-reaction-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  backdrop-filter: blur(6px);
+  font-size: 16px;
+  max-width: 90%;
+  overflow: hidden;
+}
+.thumb-reactions-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.thumb-reaction-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.thumb-more-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
 @media (max-width: 768px) {
   .carousel {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -71,9 +111,14 @@ body{
   .thumb {
     height: 260px;
   }
+  .thumb-reaction-bar {
+    font-size: 14px;
+    padding: 5px 10px;
+    gap: 6px;
+  }
 }
 
-/* モーダル */
+/* モーダル用（変更なし） */
 .modal {
   display: none;
   position: fixed;
@@ -115,7 +160,6 @@ body{
   user-select: none;
   background-color: rgba(0,0,0,0.5);
   border-radius: 8px;
-  transition: background-color 0.3s;
 }
 .prev:hover, .next:hover {
   background-color: rgba(0,0,0,0.8);
@@ -145,7 +189,6 @@ body{
   font-size: 16px;
 }
 
-/* リアクションバー */
 .reaction-bar {
   position: absolute;
   bottom: 80px;
@@ -161,14 +204,11 @@ body{
   backdrop-filter: blur(8px);
   max-width: 90vw;
 }
-
 .reactions-container {
   display: flex;
   align-items: center;
   gap: 12px;
-  overflow: hidden;
 }
-
 .reaction-item {
   display: flex;
   align-items: center;
@@ -177,7 +217,6 @@ body{
   cursor: pointer;
   user-select: none;
 }
-
 .more-emoji-btn {
   font-size: 28px;
   background: none;
@@ -187,7 +226,6 @@ body{
   opacity: 0.7;
   line-height: 1;
 }
-
 .emoji-picker-container {
   position: absolute;
   bottom: 140px;
