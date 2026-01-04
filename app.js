@@ -1,8 +1,25 @@
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
 
 let images = [];
+let currentIndex = 0;
+
 const carousel = document.getElementById("carousel");
 const msg = document.getElementById("msg");
+
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modal-img");
+const closeBtn = document.getElementById("close");
+
+const reactionsContainer = document.getElementById("reactions-container");
+
+let prevBtn, nextBtn;
+
+// モーダル内を縦並びにするためのラッパ
+let modalInner = null;
+
+function showError(text){
+  msg.innerHTML = `<div class="error">${text}</div>`;
+}
 
 /* ===== localStorage ===== */
 function storageKey(id){ return `reactions_${id}`; }
@@ -19,41 +36,110 @@ function saveReactions(id, data){
   localStorage.setItem(storageKey(id), JSON.stringify(data));
 }
 
-/* ===== 描画 ===== */
-function renderReactions(id, container){
-  const data = loadReactions(id);
+/* ===== 描画（固定3種） ===== */
+function renderReactions(postId, container, type){
+  const data = loadReactions(postId);
   container.innerHTML = "";
 
   FIXED_REACTIONS.forEach((emoji)=>{
     const count = data[emoji] || 0;
 
-    const btn = document.createElement("div");
-    btn.className = "thumb-reaction-item";
-    btn.innerHTML = `${emoji}<span>${count}</span>`;
+    const item = document.createElement("div");
+    item.className = type === "modal" ? "reaction-item" : "thumb-reaction-item";
+    item.innerHTML = `${emoji}<span>${count}</span>`;
 
-    btn.addEventListener("click", (e)=>{
+    item.addEventListener("click", (e)=>{
       e.stopPropagation();
       data[emoji] = (data[emoji] || 0) + 1;
-      saveReactions(id, data);
-      renderReactions(id, container);
+      saveReactions(postId, data);
+
+      // モーダル更新
+      renderReactions(postId, reactionsContainer, "modal");
+
+      // 一覧の該当カード更新
+      const thumbContainers = document.querySelectorAll(".thumb-reactions-container");
+      images.forEach((it, idx)=>{
+        if(it.id === postId && thumbContainers[idx]){
+          renderReactions(postId, thumbContainers[idx], "thumb");
+        }
+      });
     });
 
-    container.appendChild(btn);
+    container.appendChild(item);
   });
+}
+
+/* ===== モーダル ===== */
+function ensureModalInner(){
+  if(modalInner) return;
+
+  modalInner = document.createElement("div");
+  modalInner.className = "modal-inner";
+
+  // modal の子要素を modalInner に移動（close/prev/next以外）
+  // 既存の #modal-img と #reaction-bar を縦並びにしたい
+  const reactionBar = document.getElementById("reaction-bar");
+
+  modalInner.appendChild(modalImg);
+  modalInner.appendChild(reactionBar);
+
+  modal.appendChild(modalInner);
+}
+
+function openModal(index){
+  currentIndex = index;
+  ensureModalInner();
+
+  modal.style.display = "block";
+  setTimeout(()=> modal.classList.add("show"), 10);
+
+  modalImg.src = images[currentIndex].file;
+
+  if(!prevBtn){
+    prevBtn = document.createElement("div");
+    prevBtn.className = "prev";
+    prevBtn.innerHTML = "‹";
+    prevBtn.onclick = prevImage;
+    modal.appendChild(prevBtn);
+
+    nextBtn = document.createElement("div");
+    nextBtn.className = "next";
+    nextBtn.innerHTML = "›";
+    nextBtn.onclick = nextImage;
+    modal.appendChild(nextBtn);
+  }
+
+  renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+}
+
+function closeModal(){
+  modal.classList.remove("show");
+  setTimeout(()=> (modal.style.display = "none"), 300);
+}
+
+function prevImage(){
+  currentIndex = (currentIndex - 1 + images.length) % images.length;
+  modalImg.src = images[currentIndex].file;
+  renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+}
+
+function nextImage(){
+  currentIndex = (currentIndex + 1) % images.length;
+  modalImg.src = images[currentIndex].file;
+  renderReactions(images[currentIndex].id, reactionsContainer, "modal");
 }
 
 /* ===== 初期化 ===== */
 async function init(){
   let res;
   try{
-    res = await fetch("/images.json", { cache: "no-store" });
+    res = await fetch("/images.json", { cache:"no-store" });
   }catch{
-    msg.innerHTML = `<div class="error">images.json を読み込めませんでした</div>`;
+    showError("images.json を読み込めませんでした（ネットワークエラー）");
     return;
   }
-
   if(!res.ok){
-    msg.innerHTML = `<div class="error">images.json の読み込みに失敗しました（${res.status}）</div>`;
+    showError(`images.json の読み込みに失敗しました（${res.status}）`);
     return;
   }
 
@@ -61,19 +147,18 @@ async function init(){
   try{
     data = await res.json();
   }catch{
-    msg.innerHTML = `<div class="error">images.json が壊れています（JSON形式エラー）</div>`;
+    showError("images.json が壊れています（JSON形式エラー）");
     return;
   }
-
   if(!Array.isArray(data) || data.length === 0){
-    msg.innerHTML = `<div class="error">images.json に画像データがありません</div>`;
+    showError("images.json に画像データがありません");
     return;
   }
 
   images = data;
   carousel.innerHTML = "";
 
-  images.forEach((item)=>{
+  images.forEach((item, index)=>{
     const card = document.createElement("div");
     card.className = "thumb-container";
 
@@ -82,9 +167,7 @@ async function init(){
     img.loading = "lazy";
     img.src = item.file;
     img.alt = `illustration ${item.id}`;
-
-    // 今回は一覧でのクリック拡大を一旦切る（必要なら後で戻す）
-    // img.onclick = () => openModal(index);
+    img.onclick = ()=> openModal(index); // ← モーダル復活
 
     const bar = document.createElement("div");
     bar.className = "thumb-reaction-bar";
@@ -97,8 +180,20 @@ async function init(){
     card.appendChild(bar);
     carousel.appendChild(card);
 
-    renderReactions(item.id, reactions);
+    renderReactions(item.id, reactions, "thumb");
+  });
+
+  // キーボード操作
+  document.addEventListener("keydown", (e)=>{
+    if(modal.style.display === "block"){
+      if(e.key === "ArrowLeft") prevImage();
+      if(e.key === "ArrowRight") nextImage();
+      if(e.key === "Escape") closeModal();
+    }
   });
 }
+
+closeBtn.onclick = closeModal;
+modal.onclick = (event)=>{ if(event.target === modal) closeModal(); };
 
 init();

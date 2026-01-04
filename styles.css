@@ -1,4 +1,49 @@
-/* ====== 一覧グリッド ====== */
+:root{
+  --bg:#f6f3f1;
+  --text:#222;
+  --muted:rgba(0,0,0,.55);
+  --card:rgba(255,255,255,.85);
+  --shadow:0 10px 30px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* ===== 上部 ===== */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+}
+.brand{
+  font-size:28px;
+  letter-spacing:.5px;
+}
+.icons a{
+  margin-left:12px;
+  text-decoration:none;
+  color:var(--text);
+  opacity:.75;
+}
+.wrap{padding:0 22px 60px}
+.about{max-width:640px; line-height:1.8; color:var(--muted); margin-bottom:40px}
+.btn{
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.18);
+  text-decoration:none;
+  color:var(--text);
+  background:rgba(255,255,255,.55);
+}
+
+/* ===== 一覧グリッド ===== */
 .carousel{
   display:grid;
   grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
@@ -6,7 +51,6 @@
   margin-top:20px;
   padding:0 10px;
 }
-
 @media (max-width:768px){
   .carousel{
     grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
@@ -14,31 +58,29 @@
   }
 }
 
-/* ====== カード（画像＋下段バーを一体化） ====== */
+/* ===== カード（画像＋下段バー一体） ===== */
 .thumb-container{
   border-radius:16px;
-  overflow:hidden;                 /* ← 角丸と“はみ出し防止”はここで管理 */
-  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  overflow:hidden;
+  box-shadow:var(--shadow);
   background:rgba(255,255,255,.7);
   display:flex;
   flex-direction:column;
 }
 
-/* ====== 画像 ====== */
 .thumb{
   width:100%;
-  height:380px;                    /* ← PCの固定高さ */
+  height:380px;
   object-fit:cover;
   display:block;
-  background:rgba(0,0,0,.04);
   cursor:pointer;
+  background:rgba(0,0,0,.04);
 }
-
 @media (max-width:768px){
-  .thumb{ height:260px; }          /* ← スマホの固定高さ */
+  .thumb{ height:260px; }
 }
 
-/* ====== 下段リアクションバー（カード幅ぴったり） ====== */
+/* ===== 下段リアクション（👍❤️🙏固定） ===== */
 .thumb-reaction-bar{
   width:100%;
   padding:10px 12px;
@@ -46,51 +88,161 @@
   border-top:1px solid rgba(0,0,0,.06);
 }
 
-/* 3ボタン固定：space-betweenは使わない（事故る） */
 .thumb-reactions-container{
   display:flex;
   gap:10px;
-  justify-content:flex-start;
+  justify-content:flex-start; /* space-between禁止：事故る */
   width:100%;
 }
 
-/* ====== ボタン（桁が増えてもサイズ不変） ====== */
 .thumb-reaction-item{
   width:86px;
   height:36px;
   border-radius:999px;
   background:rgba(0,0,0,.06);
-
   display:flex;
   align-items:center;
   justify-content:center;
   gap:6px;
-
   cursor:pointer;
   user-select:none;
   flex:0 0 auto;
-
   font-size:18px;
 }
 
-/* 数字の幅を固定（0〜9999でも崩れない） */
 .thumb-reaction-item span{
   display:inline-block;
-  width:3.5ch;                     /* ← ここがキモ */
+  width:3.5ch; /* 0〜9999でも幅変化しない */
   text-align:right;
   font-size:14px;
   opacity:.85;
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-feature-settings:"tnum" 1,"lnum" 1;
 }
 
 @media (max-width:768px){
-  .thumb-reaction-item{
-    width:72px;
-    height:34px;
-  }
-  .thumb-reaction-item span{
-    width:3.5ch;
-    font-size:13px;
-  }
+  .thumb-reaction-item{ width:72px; height:34px; }
+  .thumb-reaction-item span{ width:3.5ch; font-size:13px; }
+}
+
+/* ===== モーダル（画像の下にリアクション：被せない） ===== */
+.modal{
+  display:none;
+  position:fixed;
+  z-index:1000;
+  left:0; top:0;
+  width:100%;
+  height:100%;
+  background-color:rgba(0,0,0,0.9);
+  opacity:0;
+  transition:opacity .3s ease;
+  padding:20px 0;
+}
+.modal.show{ opacity:1; }
+
+#close{
+  position:absolute;
+  top:15px;
+  right:35px;
+  color:#f1f1f1;
+  font-size:40px;
+  font-weight:bold;
+  cursor:pointer;
+  z-index:1001;
+}
+
+/* モーダル内を縦並びに */
+.modal-inner{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+  padding:0 16px;
+}
+
+.modal-content{
+  display:block;
+  max-width:95vw;
+  max-height:75vh;
+  object-fit:contain;
+  border-radius:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,.3);
+}
+
+/* モーダル用リアクション（被せない） */
+.reaction-bar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  background:rgba(255,255,255,.9);
+  padding:12px 18px;
+  border-radius:999px;
+  box-shadow:0 6px 24px rgba(0,0,0,0.15);
+  max-width:92vw;
+  overflow:hidden;
+}
+
+.reactions-container{
+  display:flex;
+  gap:10px;
+}
+
+/* モーダルのボタンも同じ固定サイズ */
+.reaction-item{
+  width:86px;
+  height:40px;
+  border-radius:999px;
+  background:rgba(0,0,0,.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  cursor:pointer;
+  user-select:none;
+  font-size:20px;
+}
+.reaction-item span{
+  display:inline-block;
+  width:3.5ch;
+  text-align:right;
+  font-size:14px;
+  opacity:.9;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+}
+
+@media (max-width:768px){
+  .reaction-item{ width:72px; height:38px; }
+  .reaction-item span{ width:3.5ch; font-size:13px; }
+}
+
+/* 左右ナビ（必要なら） */
+.prev,.next{
+  cursor:pointer;
+  position:absolute;
+  top:50%;
+  padding:16px;
+  margin-top:-50px;
+  color:white;
+  font-weight:bold;
+  font-size:40px;
+  background-color:rgba(0,0,0,0.5);
+  border-radius:8px;
+  user-select:none;
+  z-index:1001;
+}
+.prev{ left:20px; }
+.next{ right:20px; }
+
+/* エラー表示 */
+.error{
+  margin-top:20px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:rgba(255,255,255,.7);
+  border:1px solid rgba(0,0,0,.12);
 }
