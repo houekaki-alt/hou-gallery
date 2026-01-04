@@ -1,6 +1,4 @@
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
-
-// ★ ここを自分の Worker URL に（末尾スラッシュはどっちでもOK）
 const API_BASE = "https://reactions-api.hou-ekaki.workers.dev";
 
 let images = [];
@@ -23,13 +21,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (msg) msg.innerHTML = `<div class="error">${text}</div>`;
   }
 
-  // =========================
-  // API helpers（D1/Worker）
-  // =========================
+  function showTiny(text) {
+    // 既存msgを壊さず、下に小さく出す
+    if (!msg) return;
+    const div = document.createElement("div");
+    div.className = "error";
+    div.style.marginTop = "10px";
+    div.style.opacity = "0.9";
+    div.textContent = text;
+    msg.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
+  }
+
+  // ===== API =====
   async function apiGet(imgId) {
     const url = `${API_BASE}/?img=${encodeURIComponent(imgId)}`;
     const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`GET failed: ${res.status}`);
+    if (!res.ok) throw new Error(`GET ${res.status}`);
     return await res.json();
   }
 
@@ -39,14 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ img: imgId, emoji }),
     });
-    if (!res.ok) throw new Error(`POST failed: ${res.status}`);
+    if (!res.ok) throw new Error(`POST ${res.status}`);
     return await res.json();
   }
 
-  // =========================
-  // 描画（API形式に合わせる）
-  // 期待：{ ok:true, img:"...", reactions:[{emoji:"❤️",count:3},...] }
-  // =========================
+  // ===== normalize =====
   function normalizeToMap(apiJson) {
     const map = {};
     const list = apiJson?.reactions || [];
@@ -56,43 +61,74 @@ document.addEventListener("DOMContentLoaded", () => {
     return map;
   }
 
-  function renderFromApi(container, imgId, apiJson, type) {
-    if (!container) return;
+  // containerごとに「最後に成功したmap」を保持（失敗しても0にしないため）
+  const lastGood = new WeakMap();
 
-    const map = normalizeToMap(apiJson);
+  function renderFromMap(container, map, type) {
     container.innerHTML = "";
 
     FIXED_REACTIONS.forEach((emoji) => {
-      const count = map[emoji] || 0;
+      const count = map[emoji] ?? 0;
+
+      const item = document.createElement("div");
+      item.className = (type === "modal") ? "reaction-item" : "thumb-reaction-item";
+      item.innerHTML = `${emoji}<span>${count}</span>`;
+      container.appendChild(item);
+    });
+  }
+
+  // クリック可能にした描画（一覧/モーダル共通）
+  function renderInteractive(container, imgId, map, type) {
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    FIXED_REACTIONS.forEach((emoji) => {
+      const count = map[emoji] ?? 0;
 
       const item = document.createElement("div");
       item.className = (type === "modal") ? "reaction-item" : "thumb-reaction-item";
       item.innerHTML = `${emoji}<span>${count}</span>`;
 
-      // ★ ここが「0に戻る」を潰すキモ
-      // POSTしたあと、必ずGETし直して“最新の一覧”で描画する
       item.addEventListener("click", async (e) => {
         e.stopPropagation();
 
+        // ① まず見た目だけ即+1（気持ちいい）
+        const optimistic = { ...map, [emoji]: (map[emoji] ?? 0) + 1 };
+        lastGood.set(container, optimistic);
+        renderInteractive(container, imgId, optimistic, type);
+
+        // ② 通信：POST→GET
         try {
           await apiPost(imgId, emoji);
           const fresh = await apiGet(imgId);
+          const freshMap = normalizeToMap(fresh);
 
-          // モーダル更新
-          if (reactionsContainer && modal && modal.style.display === "block") {
-            renderFromApi(reactionsContainer, imgId, fresh, "modal");
+          // 成功したら確定表示
+          lastGood.set(container, freshMap);
+          renderInteractive(container, imgId, freshMap, type);
+
+          // モーダルと一覧の両方を同じ値に合わせる
+          if (reactionsContainer && modal && modal.style.display === "block" && reactionsContainer !== container) {
+            lastGood.set(reactionsContainer, freshMap);
+            renderInteractive(reactionsContainer, imgId, freshMap, "modal");
           }
 
-          // 一覧側の該当カード更新（全カード更新じゃなく該当だけ）
           const thumbAreas = document.querySelectorAll(".thumb-reactions-container");
           images.forEach((it, idx) => {
-            if (it.id === imgId && thumbAreas[idx]) {
-              renderFromApi(thumbAreas[idx], imgId, fresh, "thumb");
+            if (it.id === imgId && thumbAreas[idx] && thumbAreas[idx] !== container) {
+              lastGood.set(thumbAreas[idx], freshMap);
+              renderInteractive(thumbAreas[idx], imgId, freshMap, "thumb");
             }
           });
 
         } catch (err) {
+          // ★ ここが肝：失敗しても0で上書きしない
           console.error(err);
+          showTiny(`リアクション保存に失敗（${String(err.message || err)}）`);
+
+          // optimisticのまま残す（戻さない）
+          // ※厳密に戻したいならここでmapに戻すけど、今回は簡単優先
         }
       });
 
@@ -100,28 +136,37 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // =========================
-  // Share
-  // =========================
+  async function loadAndRender(container, imgId, type) {
+    // 失敗したら0表示はOK（初回だけ）
+    const zeroMap = { "👍": 0, "❤️": 0, "🙏": 0 };
+
+    try {
+      const apiJson = await apiGet(imgId);
+      const map = normalizeToMap(apiJson);
+      lastGood.set(container, map);
+      renderInteractive(container, imgId, map, type);
+    } catch (err) {
+      console.error(err);
+      lastGood.set(container, zeroMap);
+      renderInteractive(container, imgId, zeroMap, type);
+    }
+  }
+
+  // ===== Share =====
   function updateShareLink() {
     if (!shareBtn) return;
-
     shareBtn.onclick = () => {
       const id = images[currentIndex]?.id;
       if (!id) return;
-
       const shareUrl = `https://hou-gallery.pages.dev/image/${id}`;
       const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
       window.open(twitterUrl, "_blank");
     };
   }
 
-  // =========================
-  // Modal
-  // =========================
+  // ===== Modal =====
   async function openModal(index) {
     if (!modal || !modalImg) return;
-
     currentIndex = index;
 
     modalImg.src = images[currentIndex].file;
@@ -129,15 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.setAttribute("aria-hidden", "false");
     setTimeout(() => modal.classList.add("show"), 10);
 
-    try {
-      const apiJson = await apiGet(images[currentIndex].id);
-      renderFromApi(reactionsContainer, images[currentIndex].id, apiJson, "modal");
-    } catch (err) {
-      console.error(err);
-      // API落ちてもUIは出す（0表示）
-      renderFromApi(reactionsContainer, images[currentIndex].id, { reactions: [] }, "modal");
-    }
-
+    await loadAndRender(reactionsContainer, images[currentIndex].id, "modal");
     updateShareLink();
   }
 
@@ -152,15 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!modalImg) return;
     currentIndex = (currentIndex - 1 + images.length) % images.length;
     modalImg.src = images[currentIndex].file;
-
-    try {
-      const apiJson = await apiGet(images[currentIndex].id);
-      renderFromApi(reactionsContainer, images[currentIndex].id, apiJson, "modal");
-    } catch (err) {
-      console.error(err);
-      renderFromApi(reactionsContainer, images[currentIndex].id, { reactions: [] }, "modal");
-    }
-
+    await loadAndRender(reactionsContainer, images[currentIndex].id, "modal");
     updateShareLink();
   }
 
@@ -168,21 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!modalImg) return;
     currentIndex = (currentIndex + 1) % images.length;
     modalImg.src = images[currentIndex].file;
-
-    try {
-      const apiJson = await apiGet(images[currentIndex].id);
-      renderFromApi(reactionsContainer, images[currentIndex].id, apiJson, "modal");
-    } catch (err) {
-      console.error(err);
-      renderFromApi(reactionsContainer, images[currentIndex].id, { reactions: [] }, "modal");
-    }
-
+    await loadAndRender(reactionsContainer, images[currentIndex].id, "modal");
     updateShareLink();
   }
 
-  // =========================
-  // Init
-  // =========================
+  // ===== Init =====
   async function init() {
     if (!carousel) {
       showError("carousel が見つかりません（index.html の id='carousel' を確認）");
@@ -240,22 +259,11 @@ document.addEventListener("DOMContentLoaded", () => {
       card.appendChild(bar);
       carousel.appendChild(card);
 
-      // 初期表示：APIから取得（失敗したら0）
-      (async () => {
-        try {
-          const apiJson = await apiGet(item.id);
-          renderFromApi(area, item.id, apiJson, "thumb");
-        } catch (err) {
-          console.error(err);
-          renderFromApi(area, item.id, { reactions: [] }, "thumb");
-        }
-      })();
+      loadAndRender(area, item.id, "thumb");
     });
   }
 
-  // =========================
-  // Events
-  // =========================
+  // ===== Events =====
   if (closeBtn) closeBtn.addEventListener("click", closeModal);
   if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevImage(); });
   if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextImage(); });
