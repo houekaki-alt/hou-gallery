@@ -1,6 +1,6 @@
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
 
-const API_URL = "https://hou-gallery.website";
+const API_URL = "";
 
 let images = [];
 let currentIndex = 0;
