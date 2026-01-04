@@ -1,3 +1,4 @@
+/* styles.css 完全版 */
 :root{
   --bg:#f6f3f1;
   --text:#222;
@@ -41,6 +42,7 @@ body{
   background:rgba(255,255,255,.55);
 }
 
+/* 一覧 */
 .carousel {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -86,9 +88,7 @@ body{
   scrollbar-width: none;
   white-space: nowrap;
 }
-.thumb-reaction-bar::-webkit-scrollbar {
-  display: none;
-}
+.thumb-reaction-bar::-webkit-scrollbar { display: none; }
 .thumb-reactions-container {
   display: flex;
   align-items: center;
@@ -122,9 +122,7 @@ body{
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
   }
-  .thumb {
-    height: 260px;
-  }
+  .thumb { height: 260px; }
   .thumb-reaction-bar {
     margin-top: 10px;
     padding: 7px 14px;
@@ -148,9 +146,7 @@ body{
   transition: opacity 0.3s ease;
   padding: 20px 0;
 }
-.modal.show {
-  opacity: 1;
-}
+.modal.show { opacity: 1; }
 .modal-content {
   margin: auto;
   display: block;
@@ -173,9 +169,11 @@ body{
   font-size: 40px;
   background-color: rgba(0,0,0,0.5);
   border-radius: 8px;
+  user-select: none;
 }
 .prev { left: 20px; }
 .next { right: 20px; }
+
 #close {
   position: absolute;
   top: 15px;
@@ -184,7 +182,9 @@ body{
   font-size: 40px;
   font-weight: bold;
   cursor: pointer;
+  user-select: none;
 }
+
 #share-btn {
   position: absolute;
   bottom: 30px;
@@ -221,9 +221,7 @@ body{
   white-space: nowrap;
   z-index: 10;
 }
-.reaction-bar::-webkit-scrollbar {
-  display: none;
-}
+.reaction-bar::-webkit-scrollbar { display: none; }
 .reactions-container {
   display: flex;
   align-items: center;
@@ -251,18 +249,20 @@ body{
   opacity: 0.7;
   flex-shrink: 0;
 }
-.emoji-picker-container {
-  position: absolute;
-  bottom: 160px;
+
+/* ★重要：ピッカーは常に画面中央に固定 */
+.emoji-picker-container{
+  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: none;
-  z-index: 1000;
+  z-index: 2000;
   box-shadow: 0 12px 40px rgba(0,0,0,0.2);
   border-radius: 20px;
   overflow: hidden;
   max-width: 95vw;
-  max-height: 60vh;
+  max-height: 70vh;
 }
 
 .error{

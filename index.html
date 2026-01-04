@@ -32,6 +32,7 @@
       <a href="mailto:hou.ekaki@gmail.com">Mail</a>
     </div>
   </header>
+
   <div class="wrap">
     <div class="about">
       苞(@hou_enj)の創作や版権物をまとめたイラストサイトです。<br>
@@ -43,22 +44,25 @@
         <a class="btn" href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion" target="_blank" rel="noopener">マシュマロ</a>
       </div>
     </div>
+
     <div id="msg"></div>
     <div id="carousel" class="carousel"></div>
   </div>
 
-  <div id="modal" class="modal">
+  <!-- モーダル -->
+  <div id="modal" class="modal" aria-hidden="true">
     <span id="close">×</span>
-    <img id="modal-img" class="modal-content">
+    <img id="modal-img" class="modal-content" alt="">
     <button id="share-btn">Share to X</button>
 
     <div id="reaction-bar" class="reaction-bar">
       <div id="reactions-container" class="reactions-container"></div>
-      <button id="more-emoji-btn" class="more-emoji-btn">⋯</button>
+      <button id="more-emoji-btn" class="more-emoji-btn" type="button">⋯</button>
     </div>
-
-    <div id="emoji-picker-container" class="emoji-picker-container"></div>
   </div>
+
+
+  <div id="emoji-picker-container" class="emoji-picker-container" aria-hidden="true"></div>
 
   <script src="./app.js"></script>
 </body>
