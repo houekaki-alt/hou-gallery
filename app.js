@@ -139,7 +139,8 @@ async function init() {
     thumbMore.onclick = (e) => {
       e.stopPropagation();
       currentIndex = index;
-      initEmojiPickerForThumb(item.id);
+      initEmojiPicker();
+      emojiPickerContainer.style.display = 'block';
     };
 
     thumbBar.appendChild(thumbReactions);
@@ -180,7 +181,7 @@ function renderReactionBar(postId, container, type = "modal") {
   const reactions = getReactions(postId);
 
   Object.keys(reactions)
-    .sort((a, b) => reactions[b] - reactions[a])  // カウント多い順に並べる
+    .sort((a, b) => reactions[b] - reactions[a])
     .forEach(emoji => {
       const item = document.createElement("div");
       item.className = type === "thumb" ? "thumb-reaction-item" : "reaction-item";
@@ -223,7 +224,7 @@ async function initEmojiPicker() {
   picker = new EmojiMart.Picker({
     data,
     theme: "light",
-    set: "apple",  // iPhone風可愛い絵文字！
+    set: "native",  // OS標準の可愛い絵文字（#が出ない！）
     previewPosition: "none",
     skinTonePosition: "none",
     onEmojiSelect: (emoji) => {
@@ -237,12 +238,6 @@ async function initEmojiPicker() {
   moreEmojiBtn.onclick = () => {
     emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
   };
-}
-
-function initEmojiPickerForThumb(postId) {
-  currentIndex = images.findIndex(img => img.id == postId);
-  initEmojiPicker();
-  emojiPickerContainer.style.display = 'block';
 }
 
 closeBtn.onclick = closeModal;
