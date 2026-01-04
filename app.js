@@ -123,7 +123,7 @@ function openModal(index) {
   const url = new URL(location.href);
   url.searchParams.set("i", String(index + 1));
   shareBtn.onclick = () => {
-    const shareText = "苞(@hou_enj) イラスト";
+    const shareText = "苞さんのイラストを見ました！";
     const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url.toString())}`;
     window.open(shareUrl, "_blank", "noopener");
   };
