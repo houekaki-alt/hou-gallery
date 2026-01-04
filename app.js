@@ -1,5 +1,6 @@
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
-const API_URL = "https://hou-gallery.website";
+// あなたのサイトのドメイン。Workersが入り口に立っているので、ここをAPIの宛先にします。
+const API_URL = "https://hou-gallery.website"; 
 
 let images = [];
 let currentIndex = 0;
@@ -9,20 +10,21 @@ const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modal-img");
 const shareBtn = document.getElementById("share-btn");
 
-// DB用キー（変更厳禁）
+// DB用：画像ファイルを特定するための名前（カッコの中も正確に送る）
 function imgKeyFromFile(file) {
   const fileName = file.split('/').pop(); 
   return encodeURIComponent(decodeURIComponent(fileName)); 
 }
 
-// X共有URL用のID抽出（"1 (65).jpg" -> "65"）
+// X共有用：カッコの中の数字だけを抜き出す（1 (65).jpg -> 65）
 function getShortId(file) {
   const match = file.match(/\((\d+)\)/); 
   return match ? match[1] : null;
 }
 
+// APIとの通信（絵文字の取得と送信）
 async function apiCall(method, imgKey, emoji = null) {
-  const url = method === "GET" ? `${API_URL}?img=${imgKey}&t=${Date.now()}` : API_URL;
+  const url = method === "GET" ? `${API_URL}/?img=${imgKey}&t=${Date.now()}` : API_URL;
   const options = {
     method,
     headers: { "Content-Type": "application/json" },
@@ -35,6 +37,7 @@ async function apiCall(method, imgKey, emoji = null) {
   return j.reactions;
 }
 
+// 画面に絵文字ボタンを表示する
 function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
   const map = Object.fromEntries((reactionsArr || []).map(r => [r.emoji, r.count]));
   container.innerHTML = "";
@@ -56,6 +59,7 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
   });
 }
 
+// 画像に絵文字をくっつける
 async function attachReactions(item, container, isModal = false) {
   const imgKey = imgKeyFromFile(item.file);
   try {
@@ -64,6 +68,7 @@ async function attachReactions(item, container, isModal = false) {
   } catch { renderReactionsUI([], container, imgKey, isModal); }
 }
 
+// モーダルを開く
 function openModal(index) {
   currentIndex = index;
   const item = images[currentIndex];
@@ -73,11 +78,13 @@ function openModal(index) {
   attachReactions(item, document.getElementById("reactions-container"), true);
 }
 
+// モーダルを閉じる
 function closeModal() {
   modal.classList.remove("show");
   setTimeout(() => { modal.style.display = "none"; }, 250);
 }
 
+// 最初の読み込み
 async function init() {
   const res = await fetch("/images.json", { cache: "no-store" });
   images = await res.json();
@@ -102,7 +109,7 @@ async function init() {
     attachReactions(item, container, false);
   });
 
-  // URLパラメータ ?i=数字 があれば自動で開く
+  // URLに ?i=数字 があればその画像を開く
   const urlParams = new URLSearchParams(window.location.search);
   const iParam = urlParams.get('i');
   if (iParam) {
@@ -111,12 +118,13 @@ async function init() {
   }
 }
 
+// X（Twitter）共有ボタンの設定
 shareBtn.onclick = () => {
   const item = images[currentIndex];
   const shortId = getShortId(item.file);
   const text = encodeURIComponent("苞さんのイラストギャラリーより");
-  // 共有用URLを生成
-  const shareUrl = `${window.location.origin}/?i=${shortId}`;
+  // Workersの書き換えルールに合わせたURLを作る
+  const shareUrl = `https://hou-gallery.website/?i=${shortId}`;
   window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`, '_blank');
 };
 
