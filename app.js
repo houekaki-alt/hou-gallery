@@ -43,7 +43,7 @@ function openModal(index) {
     modal.appendChild(nextBtn);
   }
 
-  renderReactionBar(images[currentIndex].id, reactionsContainer);
+  renderReactionBar(images[currentIndex].id, reactionsContainer, "modal");
   initEmojiPicker();
 }
 
@@ -57,14 +57,14 @@ function prevImage() {
   currentIndex = (currentIndex - 1 + images.length) % images.length;
   modalImg.src = images[currentIndex].file;
   updateShareBtn();
-  renderReactionBar(images[currentIndex].id, reactionsContainer);
+  renderReactionBar(images[currentIndex].id, reactionsContainer, "modal");
 }
 
 function nextImage() {
   currentIndex = (currentIndex + 1) % images.length;
   modalImg.src = images[currentIndex].file;
   updateShareBtn();
-  renderReactionBar(images[currentIndex].id, reactionsContainer);
+  renderReactionBar(images[currentIndex].id, reactionsContainer, "modal");
 }
 
 function updateShareBtn() {
@@ -141,23 +141,26 @@ async function init() {
     img.alt = `illustration ${item.id}`;
     img.onclick = () => openModal(index);
 
-    // 一覧用のリアクションバー作成
+    // 一覧用リアクションバー
     const thumbBar = document.createElement("div");
     thumbBar.className = "thumb-reaction-bar";
-    const thumbContainer = document.createElement("div");
-    thumbContainer.className = "thumb-reactions-container";
-    const thumbMore = document.createElement("button");
-    thumbMore.className = "thumb-more-btn";
-    thumbMore.innerHTML = "⋯";
-    thumbMore.onclick = (e) => {
+
+    const thumbReactionsContainer = document.createElement("div");
+    thumbReactionsContainer.className = "thumb-reactions-container";
+
+    const thumbMoreBtn = document.createElement("button");
+    thumbMoreBtn.className = "thumb-more-btn";
+    thumbMoreBtn.innerHTML = "⋯";
+    thumbMoreBtn.onclick = (e) => {
       e.stopPropagation();
       currentIndex = index;
-      initEmojiPickerForThumb(item.id, thumbMore);
+      initEmojiPickerForThumb(item.id);
     };
-    thumbBar.appendChild(thumbContainer);
-    thumbBar.appendChild(thumbMore);
 
-    renderReactionBar(item.id, thumbContainer);  // 小さいバーに表示
+    thumbBar.appendChild(thumbReactionsContainer);
+    thumbBar.appendChild(thumbMoreBtn);
+
+    renderReactionBar(item.id, thumbReactionsContainer, "thumb");
 
     container.appendChild(img);
     container.appendChild(thumbBar);
@@ -187,8 +190,7 @@ function saveReactions(postId, reactions) {
   localStorage.setItem(key, JSON.stringify(reactions));
 }
 
-// 共通のバー描画関数（モーダル用と一覧用両方対応）
-function renderReactionBar(postId, container) {
+function renderReactionBar(postId, container, type = "modal") {
   container.innerHTML = '';
   const reactions = getReactions(postId);
 
@@ -196,7 +198,7 @@ function renderReactionBar(postId, container) {
     .sort()
     .forEach(emoji => {
       const item = document.createElement("div");
-      item.className = container.classList.contains("thumb-reactions-container") ? "thumb-reaction-item" : "reaction-item";
+      item.className = type === "thumb" ? "thumb-reaction-item" : "reaction-item";
       item.innerHTML = `${emoji}<span>${reactions[emoji]}</span>`;
       item.onclick = (e) => {
         e.stopPropagation();
@@ -214,12 +216,14 @@ function addReaction(postId, emoji) {
   reactions[emoji] = (reactions[emoji] || 0) + 1;
   saveReactions(postId, reactions);
 
-  // すべての表示を更新
-  renderReactionBar(postId, reactionsContainer);  // モーダル
+  // モーダル更新
+  renderReactionBar(postId, reactionsContainer, "modal");
+
+  // 一覧更新
   const thumbContainers = document.querySelectorAll('.thumb-reactions-container');
   images.forEach((item, idx) => {
-    if (item.id === postId && thumbContainers[idx]) {
-      renderReactionBar(postId, thumbContainers[idx]);
+    if (item.id == postId && thumbContainers[idx]) {
+      renderReactionBar(postId, thumbContainers[idx], "thumb");
     }
   });
 }
@@ -232,35 +236,37 @@ async function initEmojiPicker() {
     return;
   }
 
-  const data = await (await fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")).json();
+  try {
+    const data = await (await fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")).json();
 
-  picker = new EmojiMart.Picker({
-    data,
-    theme: "light",
-    previewPosition: "none",
-    skinTonePosition: "none",
-    onEmojiSelect: (emoji) => {
-      addReaction(images[currentIndex].id, emoji.native);
-      emojiPickerContainer.style.display = "none";
-    },
-  });
+    picker = new EmojiMart.Picker({
+      data,
+      theme: "light",
+      previewPosition: "none",
+      skinTonePosition: "none",
+      onEmojiSelect: (emoji) => {
+        addReaction(images[currentIndex].id, emoji.native);
+        emojiPickerContainer.style.display = "none";
+      },
+    });
 
-  emojiPickerContainer.appendChild(picker);
+    emojiPickerContainer.appendChild(picker);
 
-  moreEmojiBtn.onclick = () => {
-    emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
-  };
+    moreEmojiBtn.onclick = () => {
+      emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
+    };
+  } catch (error) {
+    console.error("Emoji picker load error:", error);
+  }
 }
 
-// 一覧の⋯ボタン用ピッカー（モーダルと同じピッカー再利用）
-function initEmojiPickerForThumb(postId, button) {
-  currentIndex = images.findIndex(img => img.id === postId);
+function initEmojiPickerForThumb(postId) {
+  currentIndex = images.findIndex(img => img.id == postId);
   initEmojiPicker();
-  emojiPickerContainer.style.display = 'block';
-  // 位置をボタン近くに調整（簡易）
+  // 一覧ピッカーの位置調整（ボタン下に）
   emojiPickerContainer.style.bottom = 'auto';
-  emojiPickerContainer.style.top = `${button.getBoundingClientRect().top + window.scrollY - 400}px`;
-  emojiPickerContainer.style.left = '50%';
+  emojiPickerContainer.style.top = '50vh';  // 画面中央に
+  emojiPickerContainer.style.display = 'block';
 }
 
 closeBtn.onclick = closeModal;
