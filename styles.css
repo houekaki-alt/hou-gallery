@@ -69,25 +69,26 @@ body{
   box-shadow: 0 20px 40px rgba(0,0,0,.2);
 }
 
-/* 一覧用リアクションバー（画像のすぐ下） */
+/* 一覧用リアクションバー（画像のすぐ下に表示） */
 .thumb-reaction-bar {
   align-self: center;
-  margin-top: 8px;  /* 画像の下にぴったりスペース */
+  margin-top: 10px;  /* 画像との間隔（調整可能） */
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 6px 14px;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.8);  /* 半透明白 */
+  padding: 7px 16px;
   border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  backdrop-filter: blur(6px);
-  font-size: 16px;
-  max-width: 90%;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  backdrop-filter: blur(8px);
+  font-size: 15px;
+  max-width: 85%;
 }
 .thumb-reactions-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 .thumb-reaction-item {
   display: flex;
@@ -95,14 +96,19 @@ body{
   gap: 4px;
   cursor: pointer;
   user-select: none;
-  font-size: 18px;
+  font-size: 18px;  /* 絵文字サイズ */
+}
+.thumb-reaction-item span {
+  font-size: 14px;  /* カウントを少し小さく */
+  opacity: 0.8;
 }
 .thumb-more-btn {
-  font-size: 20px;
+  font-size: 22px;
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.6;
+  padding: 0 4px;
   line-height: 1;
 }
 
@@ -116,9 +122,18 @@ body{
   }
   .thumb-reaction-bar {
     font-size: 14px;
-    padding: 5px 10px;
-    gap: 6px;
-    margin-top: 6px;
+    padding: 6px 12px;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .thumb-reaction-item {
+    font-size: 16px;
+  }
+  .thumb-reaction-item span {
+    font-size: 13px;
+  }
+  .thumb-more-btn {
+    font-size: 20px;
   }
 }
 
@@ -194,17 +209,18 @@ body{
   font-size: 16px;
 }
 
-/* モーダル用リアクションバー */
+/* モーダル用リアクションバー（一覧より少し大きめ） */
 .reaction-bar {
   position: absolute;
-  bottom: 80px;
+  bottom: 90px;  /* Shareボタンの上 */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.85);
-  padding: 10px 20px;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 12px 24px;
   border-radius: 999px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
   backdrop-filter: blur(8px);
@@ -213,18 +229,22 @@ body{
 .reactions-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 .reaction-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 22px;
+  gap: 8px;
+  font-size: 26px;
   cursor: pointer;
   user-select: none;
 }
+.reaction-item span {
+  font-size: 18px;
+  opacity: 0.9;
+}
 .more-emoji-btn {
-  font-size: 28px;
+  font-size: 32px;
   background: none;
   border: none;
   cursor: pointer;
@@ -234,7 +254,7 @@ body{
 }
 .emoji-picker-container {
   position: absolute;
-  bottom: 140px;
+  bottom: 160px;  /* バーの上に */
   left: 50%;
   transform: translateX(-50%);
   display: none;
