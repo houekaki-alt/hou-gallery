@@ -88,20 +88,6 @@ function setDynamicOgImage() {
     ogImageTag.setAttribute("content", ogImageUrl);
     document.head.appendChild(ogImageTag);
   }
-  let widthTag = document.querySelector('meta[property="og:image:width"]');
-  if (!widthTag) {
-    widthTag = document.createElement("meta");
-    widthTag.setAttribute("property", "og:image:width");
-    widthTag.setAttribute("content", "1200");
-    document.head.appendChild(widthTag);
-  }
-  let heightTag = document.querySelector('meta[property="og:image:height"]');
-  if (!heightTag) {
-    heightTag = document.createElement("meta");
-    heightTag.setAttribute("property", "og:image:height");
-    heightTag.setAttribute("content", "630");
-    document.head.appendChild(heightTag);
-  }
 }
 
 async function init() {
@@ -141,26 +127,25 @@ async function init() {
     img.alt = `illustration ${item.id}`;
     img.onclick = () => openModal(index);
 
-    // 一覧用リアクションバー
     const thumbBar = document.createElement("div");
     thumbBar.className = "thumb-reaction-bar";
 
-    const thumbReactionsContainer = document.createElement("div");
-    thumbReactionsContainer.className = "thumb-reactions-container";
+    const thumbReactions = document.createElement("div");
+    thumbReactions.className = "thumb-reactions-container";
 
-    const thumbMoreBtn = document.createElement("button");
-    thumbMoreBtn.className = "thumb-more-btn";
-    thumbMoreBtn.innerHTML = "⋯";
-    thumbMoreBtn.onclick = (e) => {
+    const thumbMore = document.createElement("button");
+    thumbMore.className = "thumb-more-btn";
+    thumbMore.innerHTML = "⋯";
+    thumbMore.onclick = (e) => {
       e.stopPropagation();
       currentIndex = index;
       initEmojiPickerForThumb(item.id);
     };
 
-    thumbBar.appendChild(thumbReactionsContainer);
-    thumbBar.appendChild(thumbMoreBtn);
+    thumbBar.appendChild(thumbReactions);
+    thumbBar.appendChild(thumbMore);
 
-    renderReactionBar(item.id, thumbReactionsContainer, "thumb");
+    renderReactionBar(item.id, thumbReactions, "thumb");
 
     container.appendChild(img);
     container.appendChild(thumbBar);
@@ -178,7 +163,7 @@ async function init() {
   });
 }
 
-// === リアクション機能 ===
+// リアクション機能
 function getReactions(postId) {
   const key = `reactions_${postId}`;
   const stored = localStorage.getItem(key);
@@ -195,7 +180,7 @@ function renderReactionBar(postId, container, type = "modal") {
   const reactions = getReactions(postId);
 
   Object.keys(reactions)
-    .sort()
+    .sort((a, b) => reactions[b] - reactions[a])  // カウント多い順に並べる
     .forEach(emoji => {
       const item = document.createElement("div");
       item.className = type === "thumb" ? "thumb-reaction-item" : "reaction-item";
@@ -207,7 +192,6 @@ function renderReactionBar(postId, container, type = "modal") {
       container.appendChild(item);
     });
 
-  // バーを常に表示
   container.parentElement.style.display = "flex";
 }
 
@@ -216,10 +200,8 @@ function addReaction(postId, emoji) {
   reactions[emoji] = (reactions[emoji] || 0) + 1;
   saveReactions(postId, reactions);
 
-  // モーダル更新
   renderReactionBar(postId, reactionsContainer, "modal");
 
-  // 一覧更新
   const thumbContainers = document.querySelectorAll('.thumb-reactions-container');
   images.forEach((item, idx) => {
     if (item.id == postId && thumbContainers[idx]) {
@@ -236,36 +218,30 @@ async function initEmojiPicker() {
     return;
   }
 
-  try {
-    const data = await (await fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")).json();
+  const data = await (await fetch("https://cdn.jsdelivr.net/npm/@emoji-mart/data")).json();
 
-    picker = new EmojiMart.Picker({
-      data,
-      theme: "light",
-      previewPosition: "none",
-      skinTonePosition: "none",
-      onEmojiSelect: (emoji) => {
-        addReaction(images[currentIndex].id, emoji.native);
-        emojiPickerContainer.style.display = "none";
-      },
-    });
+  picker = new EmojiMart.Picker({
+    data,
+    theme: "light",
+    set: "apple",  // iPhone風可愛い絵文字！
+    previewPosition: "none",
+    skinTonePosition: "none",
+    onEmojiSelect: (emoji) => {
+      addReaction(images[currentIndex].id, emoji.native);
+      emojiPickerContainer.style.display = "none";
+    },
+  });
 
-    emojiPickerContainer.appendChild(picker);
+  emojiPickerContainer.appendChild(picker);
 
-    moreEmojiBtn.onclick = () => {
-      emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
-    };
-  } catch (error) {
-    console.error("Emoji picker load error:", error);
-  }
+  moreEmojiBtn.onclick = () => {
+    emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
+  };
 }
 
 function initEmojiPickerForThumb(postId) {
   currentIndex = images.findIndex(img => img.id == postId);
   initEmojiPicker();
-  // 一覧ピッカーの位置調整（ボタン下に）
-  emojiPickerContainer.style.bottom = 'auto';
-  emojiPickerContainer.style.top = '50vh';  // 画面中央に
   emojiPickerContainer.style.display = 'block';
 }
 
