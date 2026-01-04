@@ -4,26 +4,24 @@ let images = [];
 let currentIndex = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // DOMが揃ってから取る（←これ大事）
   const carousel = document.getElementById("carousel");
   const msg = document.getElementById("msg");
 
-  // モーダル系（無くても落ちないようにする）
   const modal = document.getElementById("modal");
   const modalImg = document.getElementById("modal-img");
   const closeBtn = document.getElementById("close");
-  const reactionBar = document.getElementById("reaction-bar");
-  const reactionsContainer = document.getElementById("reactions-container");
+  const prevBtn = document.getElementById("prev");
+  const nextBtn = document.getElementById("next");
 
-  let prevBtn, nextBtn;
-  let modalInner = null;
+  const reactionsContainer = document.getElementById("reactions-container");
+  const shareBtn = document.getElementById("share-btn");
 
   function showError(text) {
     if (msg) msg.innerHTML = `<div class="error">${text}</div>`;
   }
 
   /* ===== localStorage ===== */
-  function storageKey(id) { return `reactions_${id}`; }
+  const storageKey = (id) => `reactions_${id}`;
 
   function loadReactions(id) {
     try {
@@ -53,17 +51,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       item.addEventListener("click", (e) => {
         e.stopPropagation();
+
         data[emoji] = (data[emoji] || 0) + 1;
         saveReactions(postId, data);
 
-        // モーダル側更新（存在する時だけ）
-        if (reactionsContainer) renderReactions(postId, reactionsContainer, "modal");
+        // モーダル更新
+        if (reactionsContainer && modal && modal.style.display === "block") {
+          renderReactions(postId, reactionsContainer, "modal");
+        }
 
         // 一覧側の該当カード更新
-        const thumbContainers = document.querySelectorAll(".thumb-reactions-container");
+        const thumbAreas = document.querySelectorAll(".thumb-reactions-container");
         images.forEach((it, idx) => {
-          if (it.id === postId && thumbContainers[idx]) {
-            renderReactions(postId, thumbContainers[idx], "thumb");
+          if (it.id === postId && thumbAreas[idx]) {
+            renderReactions(postId, thumbAreas[idx], "thumb");
           }
         });
       });
@@ -73,79 +74,67 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===== モーダル ===== */
-  function ensureModalInner() {
-    if (!modal || !modalImg || !reactionBar) return;
-    if (modalInner) return;
+  function updateShareLink() {
+    if (!shareBtn) return;
 
-    modalInner = document.createElement("div");
-    modalInner.className = "modal-inner";
+    shareBtn.onclick = () => {
+      const id = images[currentIndex]?.id;
+      if (!id) return;
 
-    // 画像とリアクションを縦に並べる
-    modalInner.appendChild(modalImg);
-    modalInner.appendChild(reactionBar);
-    modal.appendChild(modalInner);
+      const shareUrl = `https://hou-gallery.pages.dev/image/${id}`;
+      const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}`;
+      window.open(twitterUrl, "_blank");
+    };
   }
 
   function openModal(index) {
     if (!modal || !modalImg) return;
 
     currentIndex = index;
-    ensureModalInner();
-
-    modal.style.display = "block";
-    setTimeout(() => modal.classList.add("show"), 10);
 
     modalImg.src = images[currentIndex].file;
+    modal.style.display = "block";
+    modal.setAttribute("aria-hidden", "false");
+    setTimeout(() => modal.classList.add("show"), 10);
 
-    if (!prevBtn) {
-      prevBtn = document.createElement("div");
-      prevBtn.className = "prev";
-      prevBtn.innerHTML = "‹";
-      prevBtn.onclick = prevImage;
-      modal.appendChild(prevBtn);
-
-      nextBtn = document.createElement("div");
-      nextBtn.className = "next";
-      nextBtn.innerHTML = "›";
-      nextBtn.onclick = nextImage;
-      modal.appendChild(nextBtn);
-    }
-
-    if (reactionsContainer) renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+    renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+    updateShareLink();
   }
 
   function closeModal() {
     if (!modal) return;
     modal.classList.remove("show");
-    setTimeout(() => (modal.style.display = "none"), 300);
+    modal.setAttribute("aria-hidden", "true");
+    setTimeout(() => (modal.style.display = "none"), 250);
   }
 
   function prevImage() {
     if (!modalImg) return;
     currentIndex = (currentIndex - 1 + images.length) % images.length;
     modalImg.src = images[currentIndex].file;
-    if (reactionsContainer) renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+    renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+    updateShareLink();
   }
 
   function nextImage() {
     if (!modalImg) return;
     currentIndex = (currentIndex + 1) % images.length;
     modalImg.src = images[currentIndex].file;
-    if (reactionsContainer) renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+    renderReactions(images[currentIndex].id, reactionsContainer, "modal");
+    updateShareLink();
   }
 
   /* ===== 初期化 ===== */
   async function init() {
     if (!carousel) {
-      showError("carousel が見つかりません（index.html の id を確認してね）");
+      showError("carousel が見つかりません（index.html の id='carousel' を確認）");
       return;
     }
 
     let res;
     try {
-      // ★ 絶対パス "/" じゃなくて相対 "./" にする（スマホで安定）
       res = await fetch("./images.json", { cache: "no-store" });
-    } catch (e) {
+    } catch {
       showError("images.json を読み込めませんでした（ネットワークエラー）");
       return;
     }
@@ -180,41 +169,41 @@ document.addEventListener("DOMContentLoaded", () => {
       img.loading = "lazy";
       img.src = item.file;
       img.alt = `illustration ${item.id}`;
-
-      // モーダルが存在する時だけクリックで開く
-      if (modal && modalImg) img.onclick = () => openModal(index);
+      img.addEventListener("click", () => openModal(index));
 
       const bar = document.createElement("div");
       bar.className = "thumb-reaction-bar";
 
-      const reactions = document.createElement("div");
-      reactions.className = "thumb-reactions-container";
+      const area = document.createElement("div");
+      area.className = "thumb-reactions-container";
 
-      bar.appendChild(reactions);
+      bar.appendChild(area);
       card.appendChild(img);
       card.appendChild(bar);
       carousel.appendChild(card);
 
-      renderReactions(item.id, reactions, "thumb");
-    });
-
-    // キーボード操作（PC）
-    document.addEventListener("keydown", (e) => {
-      if (modal && modal.style.display === "block") {
-        if (e.key === "ArrowLeft") prevImage();
-        if (e.key === "ArrowRight") nextImage();
-        if (e.key === "Escape") closeModal();
-      }
+      // 初期 0 表示
+      renderReactions(item.id, area, "thumb");
     });
   }
 
-  // モーダルのイベント（存在する時だけ）
-  if (closeBtn) closeBtn.onclick = closeModal;
+  /* ===== イベント ===== */
+  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevImage(); });
+  if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextImage(); });
+
   if (modal) {
-    modal.onclick = (event) => {
-      if (event.target === modal) closeModal();
-    };
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
   }
+
+  document.addEventListener("keydown", (e) => {
+    if (!modal || modal.style.display !== "block") return;
+    if (e.key === "Escape") closeModal();
+    if (e.key === "ArrowLeft") prevImage();
+    if (e.key === "ArrowRight") nextImage();
+  });
 
   init();
 });
