@@ -224,8 +224,8 @@ async function initEmojiPicker() {
   picker = new EmojiMart.Picker({
     data,
     theme: "light",
-    locale: "ja",  // 日本語ピッカー！
-    set: "twitter",  // Twitter風の柔らかい可愛い絵文字
+    locale: "ja",  // 日本語ピッカー
+    set: "native",  // OS標準の可愛い絵文字（#が出ない）
     previewPosition: "none",
     skinTonePosition: "none",
     onEmojiSelect: (emoji) => {
