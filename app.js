@@ -4,12 +4,14 @@
 const API = "https://reactions-api.hou-ekaki.workers.dev";
 const EMOJIS = ["👍", "❤️", "🙏"];
 
+// 画像の実パス・命名規則
 const IMAGE_DIR = "/images/";
 const IMAGE_PREFIX = "1 (";
 const IMAGE_SUFFIX = ").jpg";
 
-const MISS_LIMIT = 60;   // 連続で無かったら終了
-const MAX_TRIES  = 5000;
+// 途中番号から始まっても拾うための安全装置
+const MISS_LIMIT = 60;
+const MAX_TRIES = 5000;
 
 /* =====================
    DOM
@@ -39,6 +41,7 @@ function setMsg(t = "") {
   if (msgEl) msgEl.textContent = t;
 }
 
+// リアクションのキーを必ず統一
 function normalizeImgKey(src) {
   return new URL(src, location.origin).pathname;
 }
@@ -48,7 +51,7 @@ function getCurrentImgKey() {
 }
 
 /* =====================
-   画像一覧（fetchを使わない）
+   画像存在確認（fetch不使用）
 ===================== */
 function imageExists(src) {
   return new Promise(resolve => {
@@ -59,6 +62,9 @@ function imageExists(src) {
   });
 }
 
+/* =====================
+   画像一覧生成（枚数指定なし）
+===================== */
 async function buildImageList() {
   const list = [];
   let miss = 0;
@@ -80,7 +86,7 @@ async function buildImageList() {
 }
 
 /* =====================
-   カルーセル
+   カルーセル（CSS想定どおり）
 ===================== */
 function renderCarousel() {
   carouselEl.innerHTML = "";
@@ -92,23 +98,31 @@ function renderCarousel() {
   setMsg("");
 
   images.forEach((src, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "thumb";
+
     const img = document.createElement("img");
     img.src = src;
     img.loading = "lazy";
-    img.style.cursor = "pointer";
+    img.alt = "";
 
-    img.onclick = () => openModal(idx);
-    carouselEl.appendChild(img);
+    btn.appendChild(img);
+    btn.onclick = () => openModal(idx);
+
+    carouselEl.appendChild(btn);
   });
 }
 
 /* =====================
-   リアクション
+   リアクション描画
 ===================== */
 function renderReactions(reactions) {
   reactionsContainer.innerHTML = "";
   reactions.forEach(r => {
     const b = document.createElement("button");
+    b.type = "button";
+    b.className = "reaction-btn";
     b.textContent = `${r.emoji} ${r.count}`;
     b.onclick = () => sendReaction(r.emoji);
     reactionsContainer.appendChild(b);
@@ -123,8 +137,8 @@ function renderDefaultReactions() {
 ===================== */
 async function apiGet(imgKey) {
   const r = await fetch(`${API}?img=${encodeURIComponent(imgKey)}`);
-  const j = await r.json();
-  if (!r.ok || !j.ok) throw new Error();
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j?.ok) throw new Error();
   return j;
 }
 async function apiPost(imgKey, emoji) {
@@ -133,8 +147,8 @@ async function apiPost(imgKey, emoji) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ img: imgKey, emoji })
   });
-  const j = await r.json();
-  if (!r.ok || !j.ok) throw new Error();
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j?.ok) throw new Error();
   return j;
 }
 
@@ -159,9 +173,10 @@ async function sendReaction(emoji) {
 
   try {
     const data = await apiPost(imgKey, emoji);
-    renderReactions(data.reactions); // ★0に戻らない
+    // ★ POST結果だけで更新 → 0に戻らない
+    renderReactions(data.reactions);
   } catch {
-    setMsg("保存失敗");
+    setMsg("リアクション保存に失敗");
   }
 }
 
@@ -171,11 +186,13 @@ async function sendReaction(emoji) {
 function openModal(idx) {
   currentIndex = idx;
   modalImgEl.src = images[currentIndex];
+
   modalEl.classList.add("open");
   modalEl.setAttribute("aria-hidden", "false");
 
   renderDefaultReactions();
   loadReactions();
+  updateShare();
 }
 
 function closeModal() {
@@ -193,11 +210,37 @@ function next() {
 }
 
 /* =====================
+   シェア（X）
+===================== */
+function updateShare() {
+  const url = encodeURIComponent(location.href);
+  const text = encodeURIComponent("苞のイラスト");
+  shareBtn.onclick = () => {
+    window.open(
+      `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      "_blank",
+      "noopener"
+    );
+  };
+}
+
+/* =====================
    イベント
 ===================== */
 closeBtn.onclick = closeModal;
 prevBtn.onclick = prev;
 nextBtn.onclick = next;
+
+modalEl.addEventListener("click", e => {
+  if (e.target === modalEl) closeModal();
+});
+
+window.addEventListener("keydown", e => {
+  if (modalEl.getAttribute("aria-hidden") === "true") return;
+  if (e.key === "Escape") closeModal();
+  if (e.key === "ArrowLeft") prev();
+  if (e.key === "ArrowRight") next();
+});
 
 /* =====================
    起動
