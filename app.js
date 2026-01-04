@@ -95,14 +95,25 @@ async function init() {
     carousel.appendChild(card);
     attachReactions(item, container, false);
   });
+
+  // URLに目印(?img=...)があったら自動でその画像を開く
+  const urlParams = new URLSearchParams(window.location.search);
+  const imgParam = urlParams.get('img');
+  if (imgParam) {
+    const idx = images.findIndex(item => imgKeyFromFile(item.file) === imgParam);
+    if (idx !== -1) openModal(idx);
+  }
 }
 
-// Xシェア（画像直リンク版）
+// Xシェア（サイトURL + 画像目印 版）
 shareBtn.addEventListener("click", () => {
   const item = images[currentIndex];
-  const absoluteImageUrl = new URL(item.file, window.location.origin).href;
   const text = encodeURIComponent("イラストを見ました！");
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(absoluteImageUrl)}`, '_blank');
+  
+  // 画像直リンクではなくサイトURLを送る（これでサムネが出る）
+  const siteUrl = `${window.location.origin}${window.location.pathname}?img=${imgKeyFromFile(item.file)}`;
+  
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(siteUrl)}`, '_blank');
 });
 
 document.getElementById("close").addEventListener("click", closeModal);
