@@ -16,10 +16,9 @@ const prevBtn = document.getElementById("prev");
 const nextBtn = document.getElementById("next");
 
 
-function imgKeyFromItem(item) {
+function keyFromItem(item) {
   return String(item.id);
 }
-
 
 function renderLoading(container, isModal = false) {
   container.innerHTML = "";
@@ -35,7 +34,7 @@ function renderLoading(container, isModal = false) {
 async function apiGet(imgKey) {
   const url = `${API_URL}/?img=${encodeURIComponent(imgKey)}`;
   const r = await fetch(url, { method: "GET" });
-  if (!r.ok) throw new Error("GET failed");
+  if (!r.ok) throw new Error(`GET failed: ${r.status}`);
   const j = await r.json();
   return j.reactions || FIXED_REACTIONS.map((e) => ({ emoji: e, count: 0 }));
 }
@@ -46,9 +45,11 @@ async function apiPost(imgKey, emoji) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ img: imgKey, emoji }),
   });
-  if (!r.ok) throw new Error("POST failed");
+  if (!r.ok) throw new Error(`POST failed: ${r.status}`);
+ 
   return r.json().catch(() => ({}));
 }
+
 
 function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
   const map = Object.fromEntries((reactionsArr || []).map((r) => [r.emoji, r.count]));
@@ -68,7 +69,7 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
       const span = btn.querySelector("span");
       const before = parseInt(span.textContent, 10) || 0;
 
-     
+      
       span.textContent = String(before + 1);
 
       try {
@@ -76,12 +77,15 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
 
         
         const latest = await apiGet(imgKey);
+
+        
         renderReactionsUI(latest, container, imgKey, isModal);
 
         
-        syncThumbIfOpen(imgKey, latest);
+        syncThumb(imgKey, latest);
+        syncModal(imgKey, latest);
       } catch (err) {
-       
+        
         span.textContent = String(before);
         console.error(err);
       }
@@ -91,25 +95,38 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
   });
 }
 
+function syncThumb(imgKey, latestReactions) {
+  const el = document.querySelector(`.thumb-reactions-container[data-key="${CSS.escape(imgKey)}"]`);
+  if (!el) return;
+  renderReactionsUI(latestReactions, el, imgKey, false);
+}
 
-function syncThumbIfOpen(imgKey, latestReactions) {
-  const thumb = document.querySelector(`.thumb-reactions-container[data-key="${CSS.escape(imgKey)}"]`);
-  if (!thumb) return;
-  renderReactionsUI(latestReactions, thumb, imgKey, false);
+function syncModal(imgKey, latestReactions) {
+ 
+  if (modal.style.display !== "block") return;
+  const item = images[currentIndex];
+  if (!item) return;
+  const curKey = keyFromItem(item);
+  if (curKey !== imgKey) return;
+  renderReactionsUI(latestReactions, reactionsContainer, imgKey, true);
 }
 
 
 function openModal(index) {
-  currentIndex = index;
-  const item = images[currentIndex];
+  if (!images.length) return;
 
-  modalImg.src = item.file;
+  currentIndex = index;
+  const item = images[currentIndex]; // ← item宣言はここ1回だけ
+  const file = item.file;
+
+  modalImg.src = file;
+
   modal.style.display = "block";
   requestAnimationFrame(() => modal.classList.add("show"));
 
-  const key = imgKeyFromItem(item);
+  const key = keyFromItem(item);
 
-  
+
   renderLoading(reactionsContainer, true);
 
   apiGet(key)
@@ -119,16 +136,13 @@ function openModal(index) {
       
     });
 
- 
-
-const item = images[currentIndex];
-shareBtn.onclick = () => {
-  const sharePage = `${location.origin}/share/${encodeURIComponent(item.id)}`;
-  const shareText = "苞さんのイラストを見ました！";
-  const xIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(sharePage)}`;
-  window.open(xIntent, "_blank", "noopener");
-};
-
+  
+  shareBtn.onclick = () => {
+    const sharePage = `${location.origin}/share/${encodeURIComponent(item.id)}`;
+    const shareText = "苞さんのイラストを見ました！";
+    const xIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(sharePage)}`;
+    window.open(xIntent, "_blank", "noopener");
+  };
 }
 
 function closeModal() {
@@ -189,8 +203,7 @@ async function init() {
     const container = document.createElement("div");
     container.className = "thumb-reactions-container";
 
-    
-    const key = imgKeyFromItem(item);
+    const key = keyFromItem(item);
     container.dataset.key = key;
 
     bar.appendChild(container);
@@ -210,6 +223,14 @@ async function init() {
   });
 
   msg.textContent = "";
+
+ 
+  const qp = new URLSearchParams(location.search);
+  const openId = qp.get("i");
+  if (openId) {
+    const idx = images.findIndex((x) => String(x.id) === String(openId));
+    if (idx >= 0) openModal(idx);
+  }
 }
 
 init().catch((err) => {
