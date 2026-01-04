@@ -1,73 +1,96 @@
-/* === カード全体 === */
+/* ====== 一覧グリッド ====== */
+.carousel{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  gap:24px;
+  margin-top:20px;
+  padding:0 10px;
+}
+
+@media (max-width:768px){
+  .carousel{
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+    gap:16px;
+  }
+}
+
+/* ====== カード（画像＋下段バーを一体化） ====== */
 .thumb-container{
+  border-radius:16px;
+  overflow:hidden;                 /* ← 角丸と“はみ出し防止”はここで管理 */
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  background:rgba(255,255,255,.7);
   display:flex;
   flex-direction:column;
 }
 
-/* === 画像 === */
+/* ====== 画像 ====== */
 .thumb{
   width:100%;
-  height:380px;
+  height:380px;                    /* ← PCの固定高さ */
   object-fit:cover;
-  border-radius:16px 16px 0 0;
-  box-shadow:0 10px 30px rgba(0,0,0,.12);
+  display:block;
+  background:rgba(0,0,0,.04);
+  cursor:pointer;
 }
 
-/* === 下段リアクションバー === */
+@media (max-width:768px){
+  .thumb{ height:260px; }          /* ← スマホの固定高さ */
+}
+
+/* ====== 下段リアクションバー（カード幅ぴったり） ====== */
 .thumb-reaction-bar{
   width:100%;
-  background:rgba(255,255,255,.92);
-  border-radius:0 0 16px 16px;
-  border-top:1px solid rgba(0,0,0,.06);
   padding:10px 12px;
-
-  overflow:hidden;                 /* ← はみ出し防止 */
+  background:rgba(255,255,255,.92);
+  border-top:1px solid rgba(0,0,0,.06);
 }
 
-/* === 中身 === */
+/* 3ボタン固定：space-betweenは使わない（事故る） */
 .thumb-reactions-container{
   display:flex;
-  justify-content:space-between;   /* ← 幅計算事故防止 */
   gap:10px;
+  justify-content:flex-start;
   width:100%;
 }
 
-/* === 各ボタン（サイズ固定） === */
+/* ====== ボタン（桁が増えてもサイズ不変） ====== */
 .thumb-reaction-item{
-  width:86px;          /* ← 数字が何桁でも変わらない */
+  width:86px;
   height:36px;
+  border-radius:999px;
+  background:rgba(0,0,0,.06);
+
   display:flex;
   align-items:center;
   justify-content:center;
   gap:6px;
 
-  background:rgba(0,0,0,.06);
-  border-radius:999px;
   cursor:pointer;
   user-select:none;
+  flex:0 0 auto;
 
   font-size:18px;
 }
 
-/* 数字部分（幅固定） */
+/* 数字の幅を固定（0〜9999でも崩れない） */
 .thumb-reaction-item span{
   display:inline-block;
-  width:24px;          /* ← 0〜9999まで耐える */
+  width:3.5ch;                     /* ← ここがキモ */
   text-align:right;
   font-size:14px;
   opacity:.85;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
-/* === スマホ微調整 === */
 @media (max-width:768px){
-  .thumb{
-    height:260px;
-  }
   .thumb-reaction-item{
     width:72px;
     height:34px;
   }
   .thumb-reaction-item span{
-    width:22px;
+    width:3.5ch;
+    font-size:13px;
   }
 }
