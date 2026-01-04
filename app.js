@@ -1,5 +1,4 @@
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
-
 const API_URL = "https://reactions-api.hou-ekaki.workers.dev";
 
 let images = [];
@@ -16,8 +15,10 @@ const closeBtn = document.getElementById("close");
 const prevBtn = document.getElementById("prev");
 const nextBtn = document.getElementById("next");
 
+
 function imgKeyFromFile(file) {
-  return encodeURIComponent(file.split("/").pop());
+  
+  return encodeURIComponent(file);
 }
 
 function makeZeroReactions() {
@@ -25,7 +26,7 @@ function makeZeroReactions() {
 }
 
 async function apiGet(imgKey) {
-  const url = `${API_URL}/?img=${imgKey}&t=${Date.now()}`;
+  const url = `${API_URL}/?img=${imgKey}`;
   const r = await fetch(url, { method: "GET" });
   if (!r.ok) throw new Error("GET failed");
   const j = await r.json();
@@ -39,7 +40,8 @@ async function apiPost(imgKey, emoji) {
     body: JSON.stringify({ img: imgKey, emoji }),
   });
   if (!r.ok) throw new Error("POST failed");
-  }
+  return true;
+}
 
 function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
   const map = Object.fromEntries((reactionsArr || []).map(r => [r.emoji, r.count]));
@@ -47,28 +49,25 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
 
   FIXED_REACTIONS.forEach(emoji => {
     const count = map[emoji] ?? 0;
-
     const btn = document.createElement("div");
     btn.className = isModal ? "reaction-item" : "thumb-reaction-item";
     btn.innerHTML = `${emoji}<span>${count}</span>`;
 
-btn.addEventListener("click", async (e) => {
+    btn.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      
       const span = btn.querySelector("span");
-      const currentVal = parseInt(span.textContent, 10) || 0;
-      span.textContent = String(currentVal + 1);
+      const before = parseInt(span.textContent, 10) || 0;
+
+            span.textContent = String(before + 1);
 
       try {
         await apiPost(imgKey, emoji);
-        
-        const latest = await apiGet(imgKey);
+               const latest = await apiGet(imgKey);
         renderReactionsUI(latest, container, imgKey, isModal);
       } catch (err) {
-       
-        span.textContent = String(currentVal);
+                span.textContent = String(before);
         console.error(err);
       }
     });
@@ -85,15 +84,26 @@ function openModal(index) {
   modal.style.display = "block";
   requestAnimationFrame(() => modal.classList.add("show"));
 
-  
   const key = imgKeyFromFile(file);
-  renderReactionsUI(makeZeroReactions(), reactionsContainer, key, true);
-  apiGet(key).then(data => renderReactionsUI(data, reactionsContainer, key, true))
-             .catch(() => renderReactionsUI(makeZeroReactions(), reactionsContainer, key, true));
 
-  // 共有ボタン
+    reactionsContainer.innerHTML = "";
+  FIXED_REACTIONS.forEach(e=>{
+    const btn = document.createElement("div");
+    btn.className = "reaction-item";
+    btn.innerHTML = `${e}<span>…</span>`;
+    reactionsContainer.appendChild(btn);
+  });
+
+  apiGet(key)
+    .then(data => renderReactionsUI(data, reactionsContainer, key, true))
+    .catch((err) => {
+      console.error(err);
+      
+    });
+
+  
   const url = new URL(location.href);
-  url.searchParams.set("i", String(index + 1)); // 
+  url.searchParams.set("i", String(index + 1));
   shareBtn.onclick = () => {
     const shareText = "苞(@hou_enj) イラスト";
     const shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url.toString())}`;
@@ -121,12 +131,11 @@ closeBtn.addEventListener("click", closeModal);
 prevBtn.addEventListener("click", prev);
 nextBtn.addEventListener("click", next);
 
-
 modal.addEventListener("click", (e) => {
   if (e.target === modal) closeModal();
 });
 
-// ESC / ← → 対応
+
 document.addEventListener("keydown", (e) => {
   const open = modal.style.display === "block";
   if (!open) return;
@@ -136,7 +145,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 async function init() {
-  const res = await fetch("/images.json");
+  const res = await fetch("/images.json", { cache: "no-store" });
   images = await res.json();
 
   carousel.innerHTML = "";
@@ -146,7 +155,7 @@ async function init() {
     card.className = "thumb-container";
 
     const img = document.createElement("img");
-    img.className = "thumb";                // ★超重要：CSSの前提を満たす
+    img.className = "thumb";
     img.src = item.file;
     img.alt = "";
     img.addEventListener("click", () => openModal(index));
@@ -164,15 +173,20 @@ async function init() {
 
     const key = imgKeyFromFile(item.file);
 
-
-    renderReactionsUI(makeZeroReactions(), container, key, false);
-
     
+    container.innerHTML = "";
+    FIXED_REACTIONS.forEach(e=>{
+      const btn = document.createElement("div");
+      btn.className = "thumb-reaction-item";
+      btn.innerHTML = `${e}<span>…</span>`;
+      container.appendChild(btn);
+    });
+
     apiGet(key)
       .then(data => renderReactionsUI(data, container, key, false))
-      .catch(() => {
-       
-        renderReactionsUI(makeZeroReactions(), container, key, false);
+      .catch((err) => {
+        console.error(err);
+      
       });
   });
 
