@@ -7,15 +7,22 @@
 
   <meta property="og:title" content="苞 イラストギャラリー">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://hou-gallery.website/">
-  <meta property="og:image" content="https://hou-gallery.website/images/1%20(18).jpg">
+  <meta property="og:url" content="https://hou-gallery.pages.dev/">
+  <meta property="og:image" content="https://hou-gallery.pages.dev/images/1%20(18).jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- ★キャッシュ回避 -->
-  <link rel="stylesheet" href="./styles.css?v=20260104_3" />
-  <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-</head>
+  <link rel="stylesheet" href="./styles.css" />
 
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPCH9WHLQJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPCH9WHLQJ');
+  </script>
+</head>
 <body>
   <header class="topbar">
     <div class="brand">@hou_enj/illustration</div>
@@ -33,9 +40,7 @@
       御用がありましたら右上のメールよりご連絡下さい。<br>
       ご意見・ご感想は下記よりお願いします。
       <div>
-        <a class="btn"
-           href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion"
-           target="_blank" rel="noopener">マシュマロ</a>
+        <a class="btn" href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion" target="_blank" rel="noopener">マシュマロ</a>
       </div>
     </div>
 
@@ -45,18 +50,14 @@
 
   <div id="modal" class="modal">
     <span id="close">×</span>
-    <img id="modal-img" class="modal-content" alt="">
-    <button id="share-btn" type="button">Share to X</button>
+    <img id="modal-img" class="modal-content">
+    <button id="share-btn">Share to X</button>
 
     <div id="reaction-bar" class="reaction-bar">
       <div id="reactions-container" class="reactions-container"></div>
-      <button id="more-emoji-btn" class="more-emoji-btn" type="button">＋</button>
     </div>
-
-    <div id="emoji-picker-container" class="emoji-picker-container"></div>
   </div>
 
- 
-  <script src="./app.js?v=20260104_3"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
