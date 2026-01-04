@@ -4,10 +4,14 @@
 const API = "https://reactions-api.hou-ekaki.workers.dev";
 const EMOJIS = ["👍", "❤️", "🙏"];
 
-// 画像の命名規則に合わせる
+// 画像の命名規則
 const IMAGE_DIR = "./images/";
 const IMAGE_PREFIX = "1 (";
 const IMAGE_SUFFIX = ").jpg";
+
+// ★ここが肝：連続で何回「無い」が続いたら探索をやめるか
+const MISS_LIMIT = 30; // 30連続404で終了（最初が18でもOK）
+const MAX_TRIES = 2000; // 念のため上限（暴走防止）
 
 /* =====================
    DOM
@@ -37,35 +41,42 @@ function setMsg(t = "") {
   if (msgEl) msgEl.textContent = t;
 }
 
-// POST / GET で必ず同じ img キーになるよう統一
 function normalizeImgKey(src) {
   return new URL(src, location.origin).pathname;
 }
-
 function getCurrentImgKey() {
   if (!modalImgEl.src) return null;
   return normalizeImgKey(modalImgEl.src);
 }
 
 /* =====================
-   画像一覧（枚数指定なし）
-   GETで存在確認（HEADは使わない）
+   画像一覧（枚数指定なし／途中開始OK）
 ===================== */
 async function buildImageList() {
   const list = [];
-  let i = 1;
+  let miss = 0;
 
-  while (true) {
+  for (let i = 1; i <= MAX_TRIES; i++) {
     const src = `${IMAGE_DIR}${IMAGE_PREFIX}${i}${IMAGE_SUFFIX}`;
+
     try {
+      // PagesでHEADが拒否される事があるのでGETで確認
       const res = await fetch(src, { method: "GET", cache: "no-store" });
-      if (!res.ok) break;
-      list.push(src);
-      i++;
+
+      if (res.ok) {
+        list.push(src);
+        miss = 0; // 見つかったら連続ミスをリセット
+      } else {
+        miss++;
+      }
     } catch {
-      break;
+      miss++;
     }
+
+    // 連続で無かったら、もう終盤と判断して終了
+    if (miss >= MISS_LIMIT) break;
   }
+
   return list;
 }
 
@@ -74,6 +85,14 @@ async function buildImageList() {
 ===================== */
 function renderCarousel() {
   carouselEl.innerHTML = "";
+
+  if (images.length === 0) {
+    setMsg("画像が見つからない（ファイル名/場所を確認して）");
+    return;
+  }
+
+  setMsg("");
+
   images.forEach((src, idx) => {
     const btn = document.createElement("button");
     btn.className = "thumb";
@@ -82,6 +101,7 @@ function renderCarousel() {
     const img = document.createElement("img");
     img.src = src;
     img.loading = "lazy";
+    img.alt = "";
 
     btn.appendChild(img);
     btn.onclick = () => openModal(idx);
@@ -90,7 +110,7 @@ function renderCarousel() {
 }
 
 /* =====================
-   リアクション
+   リアクション表示
 ===================== */
 function renderReactions(reactions) {
   reactionsContainer.innerHTML = "";
@@ -103,7 +123,6 @@ function renderReactions(reactions) {
     reactionsContainer.appendChild(b);
   });
 }
-
 function renderDefaultReactions() {
   renderReactions(EMOJIS.map(e => ({ emoji: e, count: 0 })));
 }
@@ -113,8 +132,8 @@ function renderDefaultReactions() {
 ===================== */
 async function apiGet(imgKey) {
   const r = await fetch(`${API}?img=${encodeURIComponent(imgKey)}`);
-  const j = await r.json();
-  if (!r.ok || !j.ok) throw new Error("GET failed");
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j?.ok) throw new Error(j?.error || "GET failed");
   return j;
 }
 
@@ -124,8 +143,8 @@ async function apiPost(imgKey, emoji) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ img: imgKey, emoji })
   });
-  const j = await r.json();
-  if (!r.ok || !j.ok) throw new Error("POST failed");
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j?.ok) throw new Error(j?.error || "POST failed");
   return j;
 }
 
@@ -139,9 +158,7 @@ async function loadReactions() {
   try {
     const data = await apiGet(imgKey);
     renderReactions(data.reactions);
-    setMsg("");
   } catch {
-    setMsg("リアクション取得失敗");
     renderDefaultReactions();
   }
 }
@@ -152,9 +169,8 @@ async function sendReaction(emoji) {
 
   try {
     const data = await apiPost(imgKey, emoji);
-    // ★ POST成功の結果だけ反映（0に戻らない）
+    // ★POST成功の結果だけ反映（1→0に戻らない）
     renderReactions(data.reactions);
-    setMsg("");
   } catch {
     setMsg("リアクション保存に失敗");
   }
@@ -180,6 +196,7 @@ function closeModal() {
 }
 
 function prev() {
+  if (!images.length) return;
   currentIndex = (currentIndex - 1 + images.length) % images.length;
   modalImgEl.src = images[currentIndex];
   renderDefaultReactions();
@@ -188,6 +205,7 @@ function prev() {
 }
 
 function next() {
+  if (!images.length) return;
   currentIndex = (currentIndex + 1) % images.length;
   modalImgEl.src = images[currentIndex];
   renderDefaultReactions();
