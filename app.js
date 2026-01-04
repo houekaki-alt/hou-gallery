@@ -44,11 +44,7 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
       try {
         const updated = await apiCall("POST", imgKey, emoji);
         renderReactionsUI(updated, container, imgKey, isModal);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        btn.style.pointerEvents = "auto";
-      }
+      } catch (err) { console.error(err); } finally { btn.style.pointerEvents = "auto"; }
     });
     container.appendChild(btn);
   });
@@ -59,9 +55,7 @@ async function attachReactions(item, container, isModal = false) {
   try {
     const reactions = await apiCall("GET", imgKey);
     renderReactionsUI(reactions, container, imgKey, isModal);
-  } catch {
-    renderReactionsUI([], container, imgKey, isModal);
-  }
+  } catch { renderReactionsUI([], container, imgKey, isModal); }
 }
 
 function openModal(index) {
@@ -70,9 +64,7 @@ function openModal(index) {
   modalImg.src = item.file;
   modal.style.display = "block";
   setTimeout(() => modal.classList.add("show"), 10);
-  
-  const container = document.getElementById("reactions-container");
-  attachReactions(item, container, true);
+  attachReactions(item, document.getElementById("reactions-container"), true);
 }
 
 function closeModal() {
@@ -84,11 +76,7 @@ async function init() {
   try {
     const res = await fetch("/images.json", { cache: "no-store" });
     images = await res.json();
-  } catch (e) {
-    msg.innerHTML = "images.json error";
-    return;
-  }
-
+  } catch (e) { return; }
   carousel.innerHTML = "";
   images.forEach((item, index) => {
     const card = document.createElement("div");
@@ -97,12 +85,10 @@ async function init() {
     img.className = "thumb";
     img.src = item.file;
     img.addEventListener("click", () => openModal(index));
-
     const bar = document.createElement("div");
     bar.className = "thumb-reaction-bar";
     const container = document.createElement("div");
     container.className = "thumb-reactions-container";
-
     bar.appendChild(container);
     card.appendChild(img);
     card.appendChild(bar);
@@ -111,11 +97,12 @@ async function init() {
   });
 }
 
+// Xシェア（画像直リンク版）
 shareBtn.addEventListener("click", () => {
   const item = images[currentIndex];
+  const absoluteImageUrl = new URL(item.file, window.location.origin).href;
   const text = encodeURIComponent("イラストを見ました！");
-  const url = encodeURIComponent(window.location.origin + item.file);
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(absoluteImageUrl)}`, '_blank');
 });
 
 document.getElementById("close").addEventListener("click", closeModal);
@@ -130,5 +117,4 @@ document.getElementById("next").addEventListener("click", (e) => {
   openModal(currentIndex);
 });
 modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
-
 init();
