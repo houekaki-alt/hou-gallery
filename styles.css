@@ -69,46 +69,47 @@ body{
   box-shadow: 0 20px 40px rgba(0,0,0,.2);
 }
 
-/* 一覧用リアクションバー（画像のすぐ下に表示） */
+/* 一覧用リアクションバー（最終調整：あなたの画像にぴったり） */
 .thumb-reaction-bar {
   align-self: center;
-  margin-top: 10px;  /* 画像との間隔（調整可能） */
+  margin-top: 12px;  /* 画像との間隔 */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.8);  /* 半透明白 */
-  padding: 7px 16px;
-  border-radius: 999px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-  backdrop-filter: blur(8px);
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.75);  /* 少し透明に */
+  padding: 9px 18px;
+  border-radius: 9999px;  /* より丸く */
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  backdrop-filter: blur(12px);  /* ぼかし強化 */
   font-size: 15px;
-  max-width: 85%;
+  max-width: 88%;
 }
 .thumb-reactions-container {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 .thumb-reaction-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   cursor: pointer;
   user-select: none;
-  font-size: 18px;  /* 絵文字サイズ */
+  font-size: 19px;
 }
 .thumb-reaction-item span {
-  font-size: 14px;  /* カウントを少し小さく */
-  opacity: 0.8;
+  font-size: 14px;  /* カウント小さめ */
+  opacity: 0.75;
+  font-weight: 500;
 }
 .thumb-more-btn {
-  font-size: 22px;
+  font-size: 21px;
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.6;
-  padding: 0 4px;
+  opacity: 0.55;
+  padding: 0 6px;
   line-height: 1;
 }
 
@@ -121,19 +122,19 @@ body{
     height: 260px;
   }
   .thumb-reaction-bar {
+    margin-top: 10px;
+    padding: 7px 14px;
+    gap: 10px;
     font-size: 14px;
-    padding: 6px 12px;
-    gap: 8px;
-    margin-top: 8px;
   }
   .thumb-reaction-item {
-    font-size: 16px;
+    font-size: 17px;
   }
   .thumb-reaction-item span {
     font-size: 13px;
   }
   .thumb-more-btn {
-    font-size: 20px;
+    font-size: 19px;
   }
 }
 
@@ -209,58 +210,59 @@ body{
   font-size: 16px;
 }
 
-/* モーダル用リアクションバー（一覧より少し大きめ） */
+/* モーダル用リアクションバー（一覧より大きめ） */
 .reaction-bar {
   position: absolute;
-  bottom: 90px;  /* Shareボタンの上 */
+  bottom: 90px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 12px 24px;
-  border-radius: 999px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-  backdrop-filter: blur(8px);
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 14px 28px;
+  border-radius: 9999px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  backdrop-filter: blur(12px);
   max-width: 90vw;
 }
 .reactions-container {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 .reaction-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 26px;
+  font-size: 28px;
   cursor: pointer;
   user-select: none;
 }
 .reaction-item span {
-  font-size: 18px;
-  opacity: 0.9;
+  font-size: 19px;
+  opacity: 0.85;
+  font-weight: 500;
 }
 .more-emoji-btn {
-  font-size: 32px;
+  font-size: 34px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0 8px;
-  opacity: 0.7;
+  padding: 0 10px;
+  opacity: 0.6;
   line-height: 1;
 }
 .emoji-picker-container {
   position: absolute;
-  bottom: 160px;  /* バーの上に */
+  bottom: 170px;
   left: 50%;
   transform: translateX(-50%);
   display: none;
   z-index: 100;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  border-radius: 20px;
   overflow: hidden;
 }
 
