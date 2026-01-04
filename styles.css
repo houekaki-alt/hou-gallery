@@ -1,4 +1,4 @@
-/* styles.css 完全版 */
+/* styles.css 完全版（あなたの元CSS + ピッカーの固定/座標対応だけ調整） */
 :root{
   --bg:#f6f3f1;
   --text:#222;
@@ -42,7 +42,6 @@ body{
   background:rgba(255,255,255,.55);
 }
 
-/* 一覧 */
 .carousel {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -115,7 +114,10 @@ body{
   cursor: pointer;
   opacity: 0.6;
   flex-shrink: 0;
+  padding: 2px 6px;
+  border-radius: 8px;
 }
+.thumb-more-btn:active { transform: scale(.98); }
 
 @media (max-width: 768px) {
   .carousel {
@@ -173,7 +175,6 @@ body{
 }
 .prev { left: 20px; }
 .next { right: 20px; }
-
 #close {
   position: absolute;
   top: 15px;
@@ -184,7 +185,6 @@ body{
   cursor: pointer;
   user-select: none;
 }
-
 #share-btn {
   position: absolute;
   bottom: 30px;
@@ -250,19 +250,17 @@ body{
   flex-shrink: 0;
 }
 
-/* ★重要：ピッカーは常に画面中央に固定 */
-.emoji-picker-container{
+/* ★ピッカー：JSで座標を入れる前提 */
+.emoji-picker-container {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   display: none;
-  z-index: 2000;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-  border-radius: 20px;
-  overflow: hidden;
+  z-index: 9999;
   max-width: 95vw;
   max-height: 70vh;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+  background: #fff;
 }
 
 .error{

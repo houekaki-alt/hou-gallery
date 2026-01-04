@@ -1,4 +1,4 @@
-// app.js 完全版
+// app.js 完全版（スマホ＝中央、PC＝⋯ボタン近くに表示 + iPhone即閉じ対策）
 let images = [];
 let currentIndex = 0;
 
@@ -27,9 +27,58 @@ function isModalOpen() {
   return modal.style.display === "block";
 }
 
-function openPicker() {
+/* ===== Picker open/close (PC: near button, Mobile: center) ===== */
+function openPickerAt(anchorEl) {
   emojiPickerContainer.style.display = "block";
   emojiPickerContainer.setAttribute("aria-hidden", "false");
+
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  // スマホ/アンカーなしは中央固定
+  if (isMobile || !anchorEl) {
+    emojiPickerContainer.style.left = "50%";
+    emojiPickerContainer.style.top = "50%";
+    emojiPickerContainer.style.transform = "translate(-50%, -50%)";
+    return;
+  }
+
+  // PCは押したボタン付近
+  emojiPickerContainer.style.transform = "translate(0, 0)";
+
+  const r = anchorEl.getBoundingClientRect();
+  const margin = 12;
+
+  // サイズ計測のため一旦表示位置を仮置き
+  emojiPickerContainer.style.left = "0px";
+  emojiPickerContainer.style.top = "0px";
+
+  requestAnimationFrame(() => {
+    const pw = emojiPickerContainer.offsetWidth;
+    const ph = emojiPickerContainer.offsetHeight;
+
+    let left = r.left;
+    let top = r.bottom + margin;
+
+    // 右はみ出し補正
+    left = Math.min(left, window.innerWidth - pw - margin);
+    left = Math.max(margin, left);
+
+    // 下はみ出しなら上に出す
+    if (top + ph > window.innerHeight - margin) {
+      top = r.top - ph - margin;
+    }
+
+    // 上も無理なら中央
+    if (top < margin) {
+      emojiPickerContainer.style.left = "50%";
+      emojiPickerContainer.style.top = "50%";
+      emojiPickerContainer.style.transform = "translate(-50%, -50%)";
+      return;
+    }
+
+    emojiPickerContainer.style.left = `${left}px`;
+    emojiPickerContainer.style.top = `${top}px`;
+  });
 }
 
 function closePicker() {
@@ -37,11 +86,12 @@ function closePicker() {
   emojiPickerContainer.setAttribute("aria-hidden", "true");
 }
 
-function togglePicker() {
+function togglePicker(anchorEl) {
   if (emojiPickerContainer.style.display === "block") closePicker();
-  else openPicker();
+  else openPickerAt(anchorEl);
 }
 
+/* ===== Modal ===== */
 function openModal(index) {
   currentIndex = index;
 
@@ -68,8 +118,7 @@ function openModal(index) {
   }
 
   renderReactionBar(images[currentIndex].id, reactionsContainer, "modal");
-
-  initEmojiPicker(); // 読み込みだけ先にしておく
+  initEmojiPicker(); // 先読み
 }
 
 function closeModal() {
@@ -103,6 +152,7 @@ function updateShareBtn() {
   };
 }
 
+/* ===== OG image ===== */
 function setDynamicOgImage() {
   if (images.length === 0) return;
   const latestImage = images[images.length - 1];
@@ -119,6 +169,7 @@ function setDynamicOgImage() {
   }
 }
 
+/* ===== Init gallery ===== */
 async function init() {
   let res;
   try {
@@ -169,10 +220,11 @@ async function init() {
     thumbMore.type = "button";
     thumbMore.innerHTML = "⋯";
     thumbMore.onclick = (e) => {
+      e.preventDefault();
       e.stopPropagation();
       currentIndex = index;
-      initEmojiPicker();   // 初回は非同期読込
-      togglePicker();      // 以降は即表示
+      initEmojiPicker();
+      togglePicker(e.currentTarget); // ←ここが「右側に飛ぶ」を解決
     };
 
     thumbBar.appendChild(thumbReactions);
@@ -198,7 +250,7 @@ async function init() {
   });
 }
 
-/* リアクション機能（localStorage） */
+/* ===== Reactions (localStorage) ===== */
 function getReactions(postId) {
   const key = `reactions_${postId}`;
   const stored = localStorage.getItem(key);
@@ -227,9 +279,7 @@ function renderReactionBar(postId, container, type = "modal") {
       container.appendChild(item);
     });
 
-  if (container.parentElement) {
-    container.parentElement.style.display = "flex";
-  }
+  if (container.parentElement) container.parentElement.style.display = "flex";
 }
 
 function addReaction(postId, emoji) {
@@ -242,7 +292,7 @@ function addReaction(postId, emoji) {
     renderReactionBar(postId, reactionsContainer, "modal");
   }
 
-  // 一覧側（該当サムネだけ更新）
+  // 一覧側（該当だけ更新）
   const thumbContainers = document.querySelectorAll('.thumb-reactions-container');
   images.forEach((item, idx) => {
     if (item.id == postId && thumbContainers[idx]) {
@@ -251,7 +301,7 @@ function addReaction(postId, emoji) {
   });
 }
 
-/* Emoji picker */
+/* ===== Emoji picker ===== */
 async function initEmojiPicker() {
   if (pickerReady) return;
   pickerReady = true;
@@ -275,42 +325,37 @@ async function initEmojiPicker() {
     emojiPickerContainer.innerHTML = "";
     emojiPickerContainer.appendChild(picker);
   } catch (e) {
-    // 読み込み失敗したら再トライできるように
     pickerReady = false;
-    showError("絵文字ピッカーの読み込みに失敗しました（ネットワーク/ CDN）");
+    showError("絵文字ピッカーの読み込みに失敗しました（ネットワーク / CDN）");
   }
 }
 
-/* モーダルの⋯ */
+/* ===== Buttons ===== */
 moreEmojiBtn.onclick = (e) => {
+  e.preventDefault();
   e.stopPropagation();
   initEmojiPicker();
-  togglePicker();
+  togglePicker(e.currentTarget);
 };
 
 closeBtn.onclick = closeModal;
-
 modal.onclick = function (event) {
   if (event.target === modal) closeModal();
 };
 
-/* ピッカー外クリックで閉じる（スマホで重要） */
-document.addEventListener("click", (e) => {
+/* ===== iPhone対策：外タップで閉じる（closestで安定） ===== */
+document.addEventListener("pointerdown", (e) => {
   if (emojiPickerContainer.style.display !== "block") return;
 
-  const clickedMoreBtn =
-    e.target.classList?.contains("thumb-more-btn") ||
-    e.target.classList?.contains("more-emoji-btn") ||
-    e.target === moreEmojiBtn;
+  const isMoreButton = e.target.closest(".thumb-more-btn, #more-emoji-btn, .more-emoji-btn");
+  const isInsidePicker = emojiPickerContainer.contains(e.target);
 
-  if (!emojiPickerContainer.contains(e.target) && !clickedMoreBtn) {
-    closePicker();
-  }
-});
+  if (!isInsidePicker && !isMoreButton) closePicker();
+}, { capture: true });
 
-/* ピッカー内クリックは閉じない */
-emojiPickerContainer.addEventListener("click", (e) => {
+/* ピッカー内の操作は外判定にしない */
+emojiPickerContainer.addEventListener("pointerdown", (e) => {
   e.stopPropagation();
-});
+}, { capture: true });
 
 init();
