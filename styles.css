@@ -69,21 +69,28 @@ body{
   box-shadow: 0 20px 40px rgba(0,0,0,.2);
 }
 
-/* 一覧用リアクションバー（最終調整：あなたの画像にぴったり） */
+/* 一覧用リアクションバー（横に長く並ぶように最終調整） */
 .thumb-reaction-bar {
   align-self: center;
-  margin-top: 12px;  /* 画像との間隔 */
+  margin-top: 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;  /* 左寄せで横に伸びる */
   gap: 12px;
-  background: rgba(255, 255, 255, 0.75);  /* 少し透明に */
+  background: rgba(255, 255, 255, 0.75);
   padding: 9px 18px;
-  border-radius: 9999px;  /* より丸く */
+  border-radius: 9999px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  backdrop-filter: blur(12px);  /* ぼかし強化 */
+  backdrop-filter: blur(12px);
   font-size: 15px;
-  max-width: 88%;
+  max-width: 95%;  /* 横幅を広げてたくさん並べる */
+  overflow-x: auto;  /* たくさんになったら横スクロール */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;  /* Firefoxでスクロールバー非表示 */
+}
+.thumb-reaction-bar::-webkit-scrollbar {
+  display: none;  /* Chrome/Safariでスクロールバー非表示 */
 }
 .thumb-reactions-container {
   display: flex;
@@ -97,11 +104,13 @@ body{
   cursor: pointer;
   user-select: none;
   font-size: 19px;
+  flex-shrink: 0;  /* 縮まないように */
 }
 .thumb-reaction-item span {
-  font-size: 14px;  /* カウント小さめ */
+  font-size: 14px;
   opacity: 0.75;
   font-weight: 500;
+  flex-shrink: 0;
 }
 .thumb-more-btn {
   font-size: 21px;
@@ -111,6 +120,7 @@ body{
   opacity: 0.55;
   padding: 0 6px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -126,6 +136,7 @@ body{
     padding: 7px 14px;
     gap: 10px;
     font-size: 14px;
+    max-width: 95%;
   }
   .thumb-reaction-item {
     font-size: 17px;
@@ -210,7 +221,7 @@ body{
   font-size: 16px;
 }
 
-/* モーダル用リアクションバー（一覧より大きめ） */
+/* モーダル用リアクションバー（一覧より大きめ・横長対応） */
 .reaction-bar {
   position: absolute;
   bottom: 90px;
@@ -218,14 +229,21 @@ body{
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 16px;
   background: rgba(255, 255, 255, 0.75);
   padding: 14px 28px;
   border-radius: 9999px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.1);
   backdrop-filter: blur(12px);
-  max-width: 90vw;
+  max-width: 95vw;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.reaction-bar::-webkit-scrollbar {
+  display: none;
 }
 .reactions-container {
   display: flex;
@@ -239,11 +257,13 @@ body{
   font-size: 28px;
   cursor: pointer;
   user-select: none;
+  flex-shrink: 0;
 }
 .reaction-item span {
   font-size: 19px;
   opacity: 0.85;
   font-weight: 500;
+  flex-shrink: 0;
 }
 .more-emoji-btn {
   font-size: 34px;
@@ -253,6 +273,7 @@ body{
   padding: 0 10px;
   opacity: 0.6;
   line-height: 1;
+  flex-shrink: 0;
 }
 .emoji-picker-container {
   position: absolute;
