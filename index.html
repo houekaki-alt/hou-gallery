@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
@@ -6,8 +7,8 @@
 
   <meta property="og:title" content="苞 イラストギャラリー">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://hou-gallery.pages.dev/">
-  <meta property="og:image" content="https://hou-gallery.pages.dev/images/1%20(18).jpg">
+  <meta property="og:url" content="https://hou-gallery.website/">
+  <meta property="og:image" content="https://hou-gallery.website/images/1%20(18).jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -23,6 +24,7 @@
     gtag('config', 'G-EPCH9WHLQJ');
   </script>
 </head>
+
 <body>
   <header class="topbar">
     <div class="brand">@hou_enj/illustration</div>
@@ -40,7 +42,8 @@
       御用がありましたら右上のメールよりご連絡下さい。<br>
       ご意見・ご感想は下記よりお願いします。
       <div>
-        <a class="btn" href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion" target="_blank" rel="noopener">マシュマロ</a>
+        <a class="btn" href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion"
+           target="_blank" rel="noopener">マシュマロ</a>
       </div>
     </div>
 
@@ -48,21 +51,20 @@
     <div id="carousel" class="carousel"></div>
   </div>
 
-  <!-- モーダル -->
-  <div id="modal" class="modal" aria-hidden="true">
+  <div id="modal" class="modal">
     <span id="close">×</span>
     <img id="modal-img" class="modal-content" alt="">
     <button id="share-btn">Share to X</button>
 
     <div id="reaction-bar" class="reaction-bar">
       <div id="reactions-container" class="reactions-container"></div>
-      <button id="more-emoji-btn" class="more-emoji-btn" type="button">⋯</button>
+      <button id="more-emoji-btn" class="more-emoji-btn" aria-label="add reaction">＋</button>
     </div>
+
+    <div id="emoji-picker-container" class="emoji-picker-container"></div>
   </div>
 
-
-  <div id="emoji-picker-container" class="emoji-picker-container" aria-hidden="true"></div>
-
-  <script src="./app.js"></script>
+  
+  <script src="./app.js?v=20260104_1"></script>
 </body>
 </html>
