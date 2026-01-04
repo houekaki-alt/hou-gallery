@@ -138,9 +138,16 @@ async function init() {
     thumbMore.innerHTML = "⋯";
     thumbMore.onclick = (e) => {
       e.stopPropagation();
-      currentIndex = index;
+      currentIndex = index;  // 重要：一覧からでもcurrentIndexを設定
       initEmojiPicker();
-      emojiPickerContainer.style.display = 'block';
+      emojiPickerContainer.style.display = 'block';  // 強制表示
+      // スマホでピッカーが画面外にならないよう位置調整
+      emojiPickerContainer.style.position = 'fixed';
+      emojiPickerContainer.style.bottom = 'auto';
+      emojiPickerContainer.style.top = '50%';
+      emojiPickerContainer.style.left = '50%';
+      emojiPickerContainer.style.transform = 'translate(-50%, -50%)';
+      emojiPickerContainer.style.maxHeight = '70vh';
     };
 
     thumbBar.appendChild(thumbReactions);
@@ -213,9 +220,6 @@ function addReaction(postId, emoji) {
 
 async function initEmojiPicker() {
   if (picker) {
-    moreEmojiBtn.onclick = () => {
-      emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
-    };
     return;
   }
 
@@ -224,7 +228,7 @@ async function initEmojiPicker() {
   picker = new EmojiMart.Picker({
     data,
     theme: "light",
-    locale: "ja",  // 日本語ピッカー
+    locale: "ja",  // 日本語
     set: "native",  // OS標準の可愛い絵文字（#が出ない）
     previewPosition: "none",
     skinTonePosition: "none",
@@ -235,10 +239,6 @@ async function initEmojiPicker() {
   });
 
   emojiPickerContainer.appendChild(picker);
-
-  moreEmojiBtn.onclick = () => {
-    emojiPickerContainer.style.display = emojiPickerContainer.style.display === 'none' ? 'block' : 'none';
-  };
 }
 
 closeBtn.onclick = closeModal;
