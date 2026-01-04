@@ -52,40 +52,23 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
     btn.className = isModal ? "reaction-item" : "thumb-reaction-item";
     btn.innerHTML = `${emoji}<span>${count}</span>`;
 
-    btn.addEventListener("click", async (e) => {
+btn.addEventListener("click", async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       
       const span = btn.querySelector("span");
-      span.textContent = String((parseInt(span.textContent, 10) || 0) + 1);
+      const currentVal = parseInt(span.textContent, 10) || 0;
+      span.textContent = String(currentVal + 1);
 
-      
       try {
         await apiPost(imgKey, emoji);
-      } catch (err) {
-        // 失敗したら元に戻す（嘘カウント防止）
-        span.textContent = String(count);
-        console.error(err);
-        return;
-      }
-
-      
-      try {
+        
         const latest = await apiGet(imgKey);
-        // このcontainerは今押した側
         renderReactionsUI(latest, container, imgKey, isModal);
-
-        
-        const modalOpen = modal.style.display === "block";
-        if (modalOpen) {
-          const currentKey = imgKeyFromFile(images[currentIndex].file);
-          if (currentKey === imgKey) {
-            renderReactionsUI(latest, reactionsContainer, imgKey, true);
-          }
-        }
       } catch (err) {
-        
+       
+        span.textContent = String(currentVal);
         console.error(err);
       }
     });
