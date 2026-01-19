@@ -8,13 +8,14 @@
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    // 門番（Worker）からの「成功」というメッセージを待ち構えるコード
+    // 窓から届く合図を「逃さずキャッチ」する予備装置
     window.addEventListener('message', (event) => {
       if (event.data && typeof event.data === 'string' && event.data.includes("authorization:github:success")) {
-        console.log("合図を受信しました！");
-        // もし窓が自動で閉じない場合は、このスクリプトが代わりに閉じます
-        const loginWindow = window.open('', 'netlify-identity');
-        if (loginWindow) loginWindow.close();
+        console.log("合図をキャッチ！画面を更新します...");
+        // 少し時間を置いてから画面を再読み込みして、ログイン状態を反映させる
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
     }, false);
   </script>
