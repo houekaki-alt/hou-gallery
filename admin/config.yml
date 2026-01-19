@@ -1,9 +1,10 @@
 backend:
   name: github
   repo: houekaki-alt/hou-gallery
-  branch: "main" # 引用符を追加
+  branch: main
   base_url: https://decap-cms-oauth.hou-ekaki.workers.dev
-  auth_endpoint: /auth # スラッシュを必ず入れる
+  auth_endpoint: https://decap-cms-oauth.hou-ekaki.workers.dev/auth
+
 
 media_folder: "images"
 public_folder: "/images"
@@ -19,4 +20,5 @@ collections:
           - label: "中身"
             name: "data"
             widget: "text"
+
 
