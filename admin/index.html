@@ -4,21 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Content Manager</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-  
   <script>
-    // 窓が閉じない問題への対策：手動でメッセージを受け取る予備コード
+    // 門番（Worker）からの「成功」というメッセージを待ち構えるコード
     window.addEventListener('message', (event) => {
-      if (event.data && event.data.includes("authorization:github:success")) {
-        console.log("合図を受け取りました！");
-        // 本来はCMSが自動で閉じますが、念のためここで処理を促す準備
+      if (event.data && typeof event.data === 'string' && event.data.includes("authorization:github:success")) {
+        console.log("合図を受信しました！");
+        // もし窓が自動で閉じない場合は、このスクリプトが代わりに閉じます
+        const loginWindow = window.open('', 'netlify-identity');
+        if (loginWindow) loginWindow.close();
       }
     }, false);
   </script>
 </body>
 </html>
-
-
