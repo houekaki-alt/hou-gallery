@@ -2,7 +2,7 @@ backend:
   name: github
   repo: houekaki-alt/hou-gallery
   branch: main
-  base_url: https://decap-cms-oauth.pages.dev
+  base_url: https://hou-gallery.pages.dev
   auth_endpoint: auth
 
 
@@ -22,6 +22,7 @@ collections:
             widget: "text"
 
 local_backend: true
+
 
 
 
