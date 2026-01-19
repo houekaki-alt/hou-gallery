@@ -1,0 +1,21 @@
+backend:
+  name: github
+  repo: houekaki-alt/hou-gallery
+  branch: main
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+  - name: "site"
+    label: "サイトデータ"
+    files:
+      - file: "images.json"
+        label: "images.json"
+        name: "images_json"
+        fields:
+          - label: "中身"
+            name: "data"
+            widget: "text"
+
+local_backend: true
