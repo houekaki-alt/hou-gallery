@@ -3,7 +3,7 @@ backend:
   repo: houekaki-alt/hou-gallery
   branch: main
   base_url: https://decap-cms-oauth.hou-ekaki.workers.dev
-  auth_endpoint: auth
+  auth_endpoint: /auth
 
 media_folder: "images"
 public_folder: "/images"
