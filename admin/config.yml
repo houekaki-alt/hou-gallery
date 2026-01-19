@@ -24,6 +24,9 @@ collections:
             widget: "text"
 
 local_backend: true
+site_url: https://hou-gallery.pages.dev
+
+
 
 
 
