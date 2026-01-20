@@ -1,15 +1,9 @@
 site_url: https://hou-gallery.pages.dev
-display_url: https://hou-gallery.pages.dev
-
-# GitHub API の大量アクセスを抑える（レート制限回避）
-search: false
 
 backend:
   name: github
   repo: houekaki-alt/hou-gallery
   branch: main
-  base_url: https://decap-cms-oauth.hou-ekaki.workers.dev
-  auth_endpoint: auth
 
 media_folder: "images"
 public_folder: "/images"
