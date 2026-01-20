@@ -6,6 +6,7 @@ backend:
   branch: main
   base_url: https://decap-cms-oauth.hou-ekaki.workers.dev
   auth_endpoint: auth
+  use_local_storage: true  
 
 
 media_folder: "images"
@@ -22,4 +23,5 @@ collections:
           - label: "中身"
             name: "data"
             widget: "text"
+
 
