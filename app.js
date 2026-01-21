@@ -14,10 +14,10 @@ async function loadArtworksFromCMS() {
     const data = await res.json();
 
     const contents = data.contents || [];
-    total = Number(data.totalCount ?? contents.length); // 念のため
+    total = Number(data.totalCount ?? contents.length); 
     all = all.concat(contents);
 
-    if (contents.length === 0) break; // 保険
+    if (contents.length === 0) break; 
     offset += limit;
   }
 
@@ -279,6 +279,7 @@ init().catch((err) => {
   console.error(err);
   msg.textContent = "読み込みに失敗しました。";
 });
+
 
 
 
