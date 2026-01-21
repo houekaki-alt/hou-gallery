@@ -1,12 +1,7 @@
 async function loadArtworksFromCMS() {
   const res = await fetch(
     "https://reactions-api.hou-ekaki.workers.dev/cms/artworks?limit=200",
-    {
-      headers: {
-        "X-MICROCMS-API-KEY": "rZuCnNa7mF8FPM3vfIPKmLgtXBiLIlj2tflQ",
-      },
-      cache: "no-store",
-    }
+    { cache: "no-store" }
   );
 
   if (!res.ok) throw new Error("CMS fetch failed: " + res.status);
@@ -268,6 +263,7 @@ init().catch((err) => {
   console.error(err);
   msg.textContent = "読み込みに失敗しました。";
 });
+
 
 
 
