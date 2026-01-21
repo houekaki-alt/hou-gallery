@@ -57,10 +57,11 @@ const closeBtn = document.getElementById("close");
 const prevBtn = document.getElementById("prev");
 const nextBtn = document.getElementById("next");
 
-
 function keyFromItem(item) {
+  if (item.legacyImgKey) return String(item.legacyImgKey);
   return String(item.id);
 }
+
 
 function renderLoading(container, isModal = false) {
   container.innerHTML = "";
@@ -279,6 +280,7 @@ init().catch((err) => {
   console.error(err);
   msg.textContent = "読み込みに失敗しました。";
 });
+
 
 
 
