@@ -1,26 +1,42 @@
 async function loadArtworksFromCMS() {
-  const res = await fetch(
-    "https://reactions-api.hou-ekaki.workers.dev/cms/artworks?limit=200",
-    { cache: "no-store" }
-  );
+  const base = "https://reactions-api.hou-ekaki.workers.dev/cms/artworks";
 
-  if (!res.ok) throw new Error("CMS fetch failed: " + res.status);
-  const data = await res.json();
+  const limit = 100;
+  let offset = 0;
+  let all = [];
+  let total = Infinity;
 
+  while (all.length < total) {
+    const url = `${base}?limit=${limit}&offset=${offset}&_=${Date.now()}`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("CMS fetch failed: " + res.status);
 
-  
-    return (data.contents || []).map((c) => {
+    const data = await res.json();
+
+    const contents = data.contents || [];
+    total = Number(data.totalCount ?? contents.length); // 念のため
+    all = all.concat(contents);
+
+    if (contents.length === 0) break; // 保険
+    offset += limit;
+  }
+
+  return all.map((c) => {
     const legacyImgKey = String(c.artwork_id || "").match(/\d+$/)?.[0] || "";
     return {
       id: c.artwork_id,
       legacyImgKey,
       title: c.title || "",
-      tags: (c.tags || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+      tags: (c.tags || "")
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean),
       file: c.image?.url || "",
       source: "cms",
     };
   });
 }
+
 
 
 
@@ -263,6 +279,7 @@ init().catch((err) => {
   console.error(err);
   msg.textContent = "読み込みに失敗しました。";
 });
+
 
 
 
