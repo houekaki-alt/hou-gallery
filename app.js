@@ -1,3 +1,22 @@
+async function loadArtworksFromCMS() {
+  const res = await fetch("https://reactions-api.hou-ekaki.workers.dev/cms/artworks?limit=200", { cache: "no-store" });
+  if (!res.ok) throw new Error("CMS fetch failed: " + res.status);
+  const data = await res.json();
+
+  
+  return (data.contents || []).map((c) => ({
+    id: c.artwork_id,         
+    title: c.title || "",
+    tags: (c.tags || "")
+      .split(/\r?\n/)
+      .map(s => s.trim())
+      .filter(Boolean),
+    file: c.image?.url || "",  
+    source: "cms",
+  }));
+}
+
+
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
 const API_URL = "https://reactions-api.hou-ekaki.workers.dev";
 
@@ -237,3 +256,4 @@ init().catch((err) => {
   console.error(err);
   msg.textContent = "読み込みに失敗しました。";
 });
+
