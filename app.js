@@ -4,17 +4,19 @@ async function loadArtworksFromCMS() {
   const data = await res.json();
 
   
-  return (data.contents || []).map((c) => ({
-    id: c.artwork_id,         
-    title: c.title || "",
-    tags: (c.tags || "")
-      .split(/\r?\n/)
-      .map(s => s.trim())
-      .filter(Boolean),
-    file: c.image?.url || "",  
-    source: "cms",
-  }));
+    return (data.contents || []).map((c) => {
+    const legacyImgKey = String(c.artwork_id || "").match(/\d+$/)?.[0] || "";
+    return {
+      id: c.artwork_id,
+      legacyImgKey,
+      title: c.title || "",
+      tags: (c.tags || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean),
+      file: c.image?.url || "",
+      source: "cms",
+    };
+  });
 }
+
 
 
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
@@ -201,8 +203,8 @@ document.addEventListener("keydown", (e) => {
 async function init() {
   msg.textContent = "読み込み中…";
 
-  const res = await fetch("/images.json", { cache: "no-store" });
-  images = await res.json();
+  images = await loadArtworksFromCMS();
+
 
   carousel.innerHTML = "";
 
@@ -256,4 +258,5 @@ init().catch((err) => {
   console.error(err);
   msg.textContent = "読み込みに失敗しました。";
 });
+
 
