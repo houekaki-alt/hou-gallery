@@ -27,25 +27,29 @@ body {
 .carousel { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; margin-top: 20px; }
 
 .thumb-container {
-  position: relative;                 
+  position: relative;
   background: var(--card);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
+
+  display: flex;           /* ★追加 */
+  flex-direction: column;  /* ★追加 */
 }
 
+
 .thumb {
-  position: relative;
-  z-index: 1;
+  flex: 0 0 auto;   
   width: 100%;
-  aspect-ratio: 1 / 1;        
-  height: auto;               
+  aspect-ratio: 1 / 1;
+  height: auto;
   object-fit: cover;
-  object-position: 50% 30%;  
+  object-position: 50% 30%;
   display: block;
   cursor: pointer;
   transition: transform 0.25s ease;
 }
+
 
 .thumb-container:hover .thumb { transform: translateY(-4px) scale(1.01); }
 
@@ -63,6 +67,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+   flex: 0 0 auto;          
 }
 
 .thumb-reaction-item {
@@ -141,4 +146,5 @@ body {
     gap: 16px;
   }
 }
+
 
