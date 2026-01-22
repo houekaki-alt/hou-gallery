@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>inside</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="inside-topbar">
+    <div class="inside-brand">inside</div>
+    <nav class="inside-nav">
+      <a href="/">gallery</a>
+      <a href="/inside.html" aria-current="page">blog</a>
+    </nav>
+  </header>
+
+  <main class="inside-layout">
+
+    <aside class="inside-side">
+      <section class="side-card">
+        <div class="side-title">最新の記事</div>
+        <ul class="side-list" id="latestList">
+
+        </ul>
+      </section>
+
+      <section class="side-card">
+        <div class="side-title">月別</div>
+        <ul class="side-list" id="archiveList">
+
+        </ul>
+      </section>
+    </aside>
+
+
+    <section class="inside-feed">
+      <div class="feed-title">記事一覧</div>
+      <div id="postList" class="post-list"></div>
+    </section>
+  </main>
+
+  <script>
+
+    const posts = [
+      {
+        id: "post_001",
+        title: "剣持刀也について",
+        date: "2026-01-22",
+        excerpt: "ライブのあと数日、言葉が出てこなかった話…",
+      },
+      {
+        id: "post_002",
+        title: "メモ：静かな置き場所",
+        date: "2026-01-20",
+        excerpt: "分かる人だけ分かる場所に文章を置く話…",
+      },
+    ];
+
+
+    const postList = document.getElementById("postList");
+    postList.innerHTML = posts.map(p => `
+      <article class="post-card">
+        <a class="post-title" href="/inside/${p.id}.html">${p.title}</a>
+        <div class="post-meta">${p.date}</div>
+        <p class="post-excerpt">${p.excerpt}</p>
+
+        <!-- ここは次STEPで“本物のいいね/コメント”にする -->
+        <div class="post-actions">
+          <button class="mini-btn" type="button">♡ いいね</button>
+          <button class="mini-btn" type="button">💬 コメント</button>
+        </div>
+      </article>
+    `).join("");
+
+
+    const latestList = document.getElementById("latestList");
+    latestList.innerHTML = posts.slice(0,3).map(p => `
+      <li><a href="/inside/${p.id}.html">${p.title}</a></li>
+    `).join("");
+
+    const byMonth = new Map();
+    posts.forEach(p => {
+      const ym = p.date.slice(0,7);
+      byMonth.set(ym, (byMonth.get(ym) || 0) + 1);
+    });
+
+    const archiveList = document.getElementById("archiveList");
+    archiveList.innerHTML = [...byMonth.entries()]
+      .sort((a,b) => b[0].localeCompare(a[0]))
+      .map(([ym,count]) => `<li><a href="/inside.html?ym=${ym}">${ym} (${count})</a></li>`)
+      .join("");
+  </script>
+</body>
+</html>
