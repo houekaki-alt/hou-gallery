@@ -72,7 +72,17 @@
   </div>
 
   <script src="./app.js"></script>
+  <script>
+  const key = document.getElementById("secretKey");
+  if (key) {
+    key.addEventListener("click", () => {
+      location.href = "/enter.html";
+    });
+  }
+</script>
+
 </body>
 </html>
+
 
 
