@@ -13,7 +13,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     status: 302,
     headers: {
       "Set-Cookie": "hou_secret=ok; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000",
-      "Location": new URL("/inside.html", url.origin).toString(), 
+      "Location": new URL("/inside", url.origin).toString(),
     },
   });
 };
