@@ -80,3 +80,32 @@ h1.page-title {
   color: #888;
   margin-top: 50px;
 }
+
+
+.post-card {
+  position: relative; 
+  padding-bottom: 60px; 
+}
+
+
+.read-more-btn {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: inline-block;
+  
+  
+  background: #333;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 30px; 
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+.read-more-btn:hover {
+  transform: scale(1.05); 
+  background: #000;
+}
