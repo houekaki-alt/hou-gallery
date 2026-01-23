@@ -1,0 +1,82 @@
+/* bodyから最後までのスタイルをここに移動 */
+body {
+  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  line-height: 1.8;
+  color: #333;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  background: #ffffff;
+  padding: 0 20px;
+  height: 60px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.back-button {
+  text-decoration: none;
+  color: #007aff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.main-container {
+  max-width: 740px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+h1.page-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.post-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+}
+
+.post-date {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.post-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+.post-content {
+  font-size: 16px;
+  color: #444;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.loading {
+  text-align: center;
+  color: #888;
+  margin-top: 50px;
+}
