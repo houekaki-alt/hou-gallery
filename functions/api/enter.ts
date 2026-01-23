@@ -13,7 +13,7 @@ export const onRequestPost: PagesFunction = async (context) => {
   status: 302,
   headers: {
     "Set-Cookie": "hou_secret=ok; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000",
-    "Location": "/inside",
+    "Location": "https://hou-gallery.website/inside",
   },
 });
 };
