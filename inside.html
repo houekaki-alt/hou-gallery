@@ -1,7 +1,81 @@
+<!doctype html>
+<html lang="ja">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inside Blog</title>
-  
   <link rel="stylesheet" href="inside.css">
 </head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-content">
+      <a href="/" class="back-link">← トップページへ</a>
+      <span class="nav-title">Inside</span>
+    </div>
+  </nav>
+
+  <main class="main-container">
+    <header class="page-header">
+      <h1 class="page-title">Blog Archive</h1>
+      <p class="page-subtitle">制作の裏側や日々の記録</p>
+    </header>
+
+    <div id="out" class="loading-state">
+      <p>記事を読み込んでいます...</p>
+    </div>
+  </main>
+
+  <script>
+    async function fetchBlog() {
+      const container = document.getElementById("out");
+      
+      try {
+       
+        const res = await fetch("https://dductkh5s9.microcms.io/api/v1/blog", {
+          headers: { "X-MICROCMS-API-KEY": "rZuCnNa7mF8FPM3vfIPKmLgtXBiLIlj2tflQ" }
+        });
+        
+        if (!res.ok) throw new Error('取得に失敗しました');
+        
+        const data = await res.json();
+        
+       
+        const html = data.contents.map(item => {
+          const date = new Date(item.publishedAt).toLocaleDateString('ja-JP', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          });
+
+          return `
+            <article class="post-card">
+              <header class="post-header">
+                <time class="post-date">${date}</time>
+                <h2 class="post-title">${item.title}</h2>
+              </header>
+              <div class="post-content">
+                ${item.content}
+              </div>
+              <div class="post-footer">
+                <span class="read-more">この記事を読む →</span>
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        
+        container.innerHTML = html;
+        container.classList.remove("loading-state");
+
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<p class="error-msg">記事を読み込めませんでした。時間をおいて再度お試しください。</p>`;
+      }
+    }
+
+    
+    fetchBlog();
+  </script>
+</body>
+</html>
