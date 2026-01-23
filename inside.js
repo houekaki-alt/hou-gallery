@@ -1,4 +1,5 @@
-fetch("https://ddutkh5s9.microcms.io/api/v1/blog", {
+fetch("https://blog-api.hou-ekaki.workers.dev/api/blog")
+, {
   headers: {
     "X-MICROCMS-API-KEY": "あとで入れる"
   }
