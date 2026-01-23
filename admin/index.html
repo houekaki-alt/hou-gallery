@@ -8,11 +8,11 @@
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   <script>
-    // 窓から届く合図を「逃さずキャッチ」する予備装置
+    
     window.addEventListener('message', (event) => {
       if (event.data && typeof event.data === 'string' && event.data.includes("authorization:github:success")) {
         console.log("合図をキャッチ！画面を更新します...");
-        // 少し時間を置いてから画面を再読み込みして、ログイン状態を反映させる
+       
         setTimeout(() => {
           window.location.reload();
         }, 500);
@@ -21,3 +21,4 @@
   </script>
 </body>
 </html>
+
