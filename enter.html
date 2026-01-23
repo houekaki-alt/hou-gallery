@@ -1,4 +1,11 @@
 <form method="post" action="/api/enter">
-  <input name="pass" type="password" placeholder="password" />
-  <button type="submit">OK</button>
+  <input id="pass-input" name="pass" type="password" placeholder="password" />
+  <button type="button" onclick="togglePass()">👁️</button> <button type="submit">OK</button>
 </form>
+
+<script>
+function togglePass() {
+  const p = document.getElementById('pass-input');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+</script>
