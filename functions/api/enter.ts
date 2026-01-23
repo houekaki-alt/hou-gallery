@@ -9,11 +9,11 @@ export const onRequestPost: PagesFunction = async (context) => {
 
   const url = new URL(context.request.url);
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      "Set-Cookie": "hou_secret=ok; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000",
-      "Location": new URL("/inside", url.origin).toString(),
-    },
-  });
+ return new Response(null, {
+  status: 302,
+  headers: {
+    "Set-Cookie": "hou_secret=ok; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000",
+    "Location": "/inside",
+  },
+});
 };
