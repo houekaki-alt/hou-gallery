@@ -1,13 +1,37 @@
 <!doctype html>
-<meta charset="utf-8" />
-<title>blog</title>
-<h1>blog</h1>
-<pre id="out">loading...</pre>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>blog</title>
+</head>
+<body>
+  <h1>blog</h1>
+  <div id="out">loading...</div>
 
-<script>
-(async () => {
-  const res = await fetch("https://blog-api.hou-ekaki.workers.dev/api/blog");
-  const text = await res.text();
-  document.getElementById("out").textContent = text;
-})();
-</script>
+  <script>
+    (async () => {
+    
+      const res = await fetch("https://dductkh5s9.microcms.io/api/v1/blog", {
+        headers: {
+          "X-MICROCMS-API-KEY": "rZuCnNa7mF8FPM3vfIPKmLgtXBiLIlj2tflQ"
+        }
+      });
+      
+      const data = await res.json();
+      
+     
+      const contents = data.contents.map(item => {
+        return `
+          <div style="margin-bottom: 20px; border-bottom: 1px solid #ccc;">
+            <h2>${item.title}</h2>
+            <div>${item.content}</div>
+          </div>
+        `;
+      }).join("");
+
+      
+      document.getElementById("out").innerHTML = contents;
+    })();
+  </script>
+</body>
+</html>
