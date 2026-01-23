@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article - Inside</title>
+  <link rel="stylesheet" href="inside.css"> </head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-content">
+      <a href="/inside" class="back-link">← 記事一覧へ戻る</a>
+    </div>
+  </nav>
+
+  <main class="main-container">
+    <article class="post-card" style="padding-bottom: 30px;">
+      <div id="post-data">読み込み中...</div>
+    </article>
+  </main>
+
+  <script>
+    async function fetchPost() {
+     
+      const urlParams = new URLSearchParams(window.location.search);
+      const postId = urlParams.get('id');
+
+      if (!postId) {
+        document.getElementById("post-data").innerHTML = "記事が見つかりません。";
+        return;
+      }
+
+      try {
+        
+        const res = await fetch(`https://dductkh5s9.microcms.io/api/v1/blog/${postId}`, {
+          headers: { "X-MICROCMS-API-KEY": "rZuCnNa7mF8FPM3vfIPKmLgtXBiLIlj2tflQ" }
+        });
+        const item = await res.json();
+
+    
+        const date = new Date(item.publishedAt).toLocaleDateString('ja-JP');
+        document.getElementById("post-data").innerHTML = `
+          <div class="post-date">${date}</div>
+          <h1 class="post-title" style="font-size: 32px;">${item.title}</h1>
+          <div class="post-content">${item.content}</div>
+        `;
+        document.title = `${item.title} - Inside`;
+
+      } catch (err) {
+        document.getElementById("post-data").innerHTML = "読み込みに失敗しました。";
+      }
+    }
+
+    fetchPost();
+  </script>
+</body>
+</html>
