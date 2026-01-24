@@ -8,31 +8,28 @@
 <body>
   <h2>パスワード入力してもろて</h2>
   <input type="password" id="pw">
-  <button onclick="check()">入る</button>
+  <button type="button" onclick="check()">入る</button>
 
   <script>
-    function check(){
+    function check() {
       const pass = "omaegasukida";
+      const inputElement = document.getElementById("pw");
+      const v = inputElement.value.trim(); 
+
+      if (v === pass) {
       
-      const v = document.getElementById("pw").value.trim();
+        document.cookie = "blog_ok=1; Max-Age=2592000; Path=/";
 
-      function check(){
-  const pass = "omaegasukida";
-  const v = document.getElementById("pw").value.trim();
-
-  if(v === pass){
-   
-    document.cookie = "blog_ok=1; Path=/;";
-
-   
-    setTimeout(function(){
-      location.href = "/inside.html"; 
-    }, 500);
-
-  }else{
-    alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
-  }
-}
+     
+        try {
+          location.replace("/inside.html");
+        } catch (e) {
+          location.href = "/inside.html";
+        }
+      } else {
+        alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
+      }
+    }
   </script>
 </body>
 </html>
