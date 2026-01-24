@@ -3,25 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <title>Password</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <h2>パスワード入力してもろて</h2>
   <input type="password" id="pw">
   <button onclick="check()">入る</button>
 
- <script>
-function check(){
-  const pass = "omaegasukida";
-  const v = document.getElementById("pw").value;
+  <script>
+    function check(){
+      const pass = "omaegasukida";
+      const v = document.getElementById("pw").value;
 
-  if(v === pass){
-    sessionStorage.setItem("blog_ok", "1");
-    location.href = "inside.html";
-  }else{
-    alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
-  }
-}
-</script>
-
+      if(v === pass){
+        
+        document.cookie = "blog_ok=1; Max-Age=2592000; Path=/; SameSite=Lax";
+        location.href = "./inside.html"; 
+      }else{
+        alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
+      }
+    }
+  </script>
 </body>
 </html>
