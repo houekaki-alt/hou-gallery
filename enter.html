@@ -13,12 +13,16 @@
   <script>
     function check(){
       const pass = "omaegasukida";
-      const v = document.getElementById("pw").value;
+      
+      const v = document.getElementById("pw").value.trim();
 
       if(v === pass){
         
         document.cookie = "blog_ok=1; Max-Age=2592000; Path=/; SameSite=Lax; Secure";
-location.replace("/inside.html");
+
+        setTimeout(function(){
+          location.replace("/inside.html");
+        }, 100);
 
       }else{
         alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
