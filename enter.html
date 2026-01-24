@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Password</title>
 
-  
   <script>
+   
     (function normalizeHost(){
       const CANON = "hou-gallery.website";
       if (location.hostname.endsWith(".pages.dev")) {
@@ -18,55 +18,25 @@
   </script>
 
   <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: #f4f4f4;
-    }
-    .input-area {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    input {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 200px;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #333;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+    body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f4f4f4; }
+    .input-area { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+    input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; width: 200px; margin-bottom: 10px; }
+    button { padding: 10px 20px; font-size: 16px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button:active { background: #666; }
   </style>
 </head>
-
 <body>
+
   <div class="input-area">
     <h2>パスワード入力してもろて</h2>
-    <input type="password" id="pw" placeholder="合言葉を入力">
+    <input type="password" id="pw" placeholder="合言葉を入力" autocomplete="current-password">
     <br>
     <button type="button" onclick="check()">入る</button>
   </div>
 
   <script>
     function setAuthCookie() {
-      const d = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const d = new Date(Date.now() + 30*24*60*60*1000); 
       let cookie =
         "blog_ok=1" +
         "; Path=/" +
@@ -84,11 +54,13 @@
 
       if (v === pass) {
         setAuthCookie();
-        location.replace("/inside.html");
+        
+        location.replace("/inside");
       } else {
         alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
       }
     }
   </script>
+
 </body>
 </html>
