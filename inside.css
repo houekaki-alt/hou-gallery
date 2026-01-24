@@ -21,14 +21,24 @@ nav {
   z-index: 10;
 }
 
-.nav-content {
+.nav-content{
   position: relative;
-  height: 56px;
+  height: 60px;
+  width: 100%;
 }
 
-.page-title {
+nav .page-title{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
   letter-spacing: 0.1em;
 }
+
+
 
 .back-link {
   position: absolute;
@@ -40,15 +50,7 @@ nav {
 }
 
 
-.page-title {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
+
 
 .main-container {
   max-width: 740px;
@@ -56,13 +58,6 @@ nav {
   padding: 0 20px;
 }
 
-h1.page-title {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 30px;
-  color: #1a1a1a;
-  text-align: center;
-}
 
 .post-card {
   background: #fff;
