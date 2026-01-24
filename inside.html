@@ -44,28 +44,37 @@
         
        
         const html = data.contents.map(item => {
-          const date = new Date(item.publishedAt).toLocaleDateString('ja-JP', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-          });
+  const date = new Date(item.publishedAt).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
 
-          return `
-            <article class="post-card">
-              <header class="post-header">
-                <time class="post-date">${date}</time>
-                <h2 class="post-title">${item.title}</h2>
-              </header>
-              <div class="post-content">
-                ${item.content}
-              </div>
-             
-              <a href="post.html?id=${item.id}" class="read-more-btn">
+
+  const plain = (item.content || "")
+    .replace(/<[^>]*>/g, "")      
+    .replace(/\s+/g, " ")        
+    .trim();
+
+  const excerpt = plain.length > 120 ? plain.slice(0, 120) + "…" : plain;
+
+  return `
+    <article class="post-card">
+      <header class="post-header">
+        <time class="post-date">${date}</time>
+        <h2 class="post-title">${item.title}</h2>
+      </header>
+
+  
+      <p class="post-excerpt">${excerpt}</p>
+
+      <a href="post.html?id=${item.id}" class="read-more-btn">
         記事をよむ
       </a>
-            </article>
-          `;
-        }).join("");
+    </article>
+  `;
+}).join("");
+
 
         
         container.innerHTML = html;
