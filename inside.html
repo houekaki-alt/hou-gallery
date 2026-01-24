@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="inside.css">
 </head>
 <body>
+<script>
+(function(){
+  const ok = document.cookie.split("; ").some(s => s.startsWith("blog_ok=1"));
+  if(!ok){
+    location.href = "./index.html"; 
+  }
+})();
+  
+</script>
 
  <nav class="navbar">
   <div class="nav-content">
@@ -94,10 +103,6 @@
   </script>
 
 </body>
-  <script>
-  if (sessionStorage.getItem("blog_ok") !== "1") {
-    location.href = "index.html"; 
-  }
 </script>
 
 </html>
