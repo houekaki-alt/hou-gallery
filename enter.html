@@ -17,8 +17,9 @@
 
       if(v === pass){
         
-        document.cookie = "blog_ok=1; Max-Age=2592000; Path=/; SameSite=Lax";
-        location.href = "./inside.html"; 
+        document.cookie = "blog_ok=1; Max-Age=2592000; Path=/; SameSite=Lax; Secure";
+location.replace("/inside.html");
+
       }else{
         alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
       }
