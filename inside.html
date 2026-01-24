@@ -8,14 +8,12 @@
 </head>
 <body>
 <script>
-(function(){
+(() => {
   const ok = document.cookie.split("; ").some(s => s.startsWith("blog_ok=1"));
-  if(!ok){
-    location.href = "./index.html"; 
-  }
+  if (!ok) location.replace("/enter.html");
 })();
-  
 </script>
+
 
  <nav class="navbar">
   <div class="nav-content">
