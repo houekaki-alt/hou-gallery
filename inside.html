@@ -92,5 +92,12 @@
     
     fetchBlog();
   </script>
+
 </body>
+  <script>
+  if (sessionStorage.getItem("blog_ok") !== "1") {
+    location.href = "index.html"; 
+  }
+</script>
+
 </html>
