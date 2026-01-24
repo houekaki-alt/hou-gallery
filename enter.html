@@ -9,15 +9,19 @@
   <input type="password" id="pw">
   <button onclick="check()">入る</button>
 
-  <script>
-    function check() {
-      const pass = "omaegasukida";
-      if (document.getElementById("pw").value === pass) {
-        location.href = "inside.html";
-      } else {
-        alert("違うよ、ごめんね長いパスワードで、打ちにくいよね");
-      }
-    }
-  </script>
+ <script>
+function check(){
+  const pass = "omaegasukida";
+  const v = document.getElementById("pw").value;
+
+  if(v === pass){
+    sessionStorage.setItem("blog_ok", "1");
+    location.href = "inside.html";
+  }else{
+    alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
+  }
+}
+</script>
+
 </body>
 </html>
