@@ -5,102 +5,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>inside</title>
   <link rel="stylesheet" href="inside.css">
+  <script>
+   
+    (() => {
+      const isOk = () => document.cookie.split("; ").some(s => s.startsWith("blog_ok=1"));
+
+      if (!isOk()) {
+      
+        setTimeout(() => {
+          if (!isOk()) {
+            alert("パスワードを認証できませんでした。もう一度入力してください。");
+            location.replace("./enter.html");
+          }
+        }, 500);
+      }
+    })();
+  </script>
 </head>
 <body>
-<script>
-(() => {
-  const ok = document.cookie.split("; ").some(s => s.startsWith("blog_ok=1"));
-  if (!ok) location.replace("/enter.html");
-})();
-</script>
 
-
- <nav class="navbar">
+<nav class="navbar">
   <div class="nav-content">
     <a href="https://hou-gallery.website/" class="back-link">ギャラリーに戻る</a>
     <h1 class="page-title">blog</h1>
   </div>
 </nav>
 
-    </div>
-  </nav>
+<main class="main-container">
+  <header class="page-header">
+    <p class="page-subtitle">
+      ガチのめちゃ長い独り言(ろくろ)・気が向けばメイキング<br>
+      この記事の内容は、他言無用でお願いします！感想とか意見あれば、鍵垢のリプとかでおなしゃす。
+    </p>
+  </header>
 
-  <main class="main-container">
-    <header class="page-header">
-    
-      <p class="page-subtitle">ガチのめちゃ長い独り言(ろくろ)・気が向けばメイキング<br>
-      ここの記事の内容は、他言無用でお願いします！感想とか意見あれば、鍵垢のリプとかでおなしゃす。
-      </p>
-    </header>
+  <div id="out" class="loading-state">
+    <p>記事を読み込んでいます...</p>
+  </div>
+</main>
 
-    <div id="out" class="loading-state">
-      <p>記事を読み込んでいます...</p>
-    </div>
-  </main>
+<script>
+  async function fetchBlog() {
+    const container = document.getElementById("out");
+    try {
+      const res = await fetch("https://dductkh5s9.microcms.io/api/v1/blog", {
+        headers: { "X-MICROCMS-API-KEY": "rZuCnNa7mF8FPM3vfIPKmLgtXBiLIlj2tflQ" }
+      });
+      if (!res.ok) throw new Error('取得に失敗しました');
+      const data = await res.json();
 
-  <script>
-    async function fetchBlog() {
-      const container = document.getElementById("out");
-      
-      try {
-       
-        const res = await fetch("https://dductkh5s9.microcms.io/api/v1/blog", {
-          headers: { "X-MICROCMS-API-KEY": "rZuCnNa7mF8FPM3vfIPKmLgtXBiLIlj2tflQ" }
+      const html = data.contents.map(item => {
+        const date = new Date(item.publishedAt).toLocaleDateString('ja-JP', {
+          year: 'numeric', month: '2-digit', day: '2-digit'
         });
-        
-        if (!res.ok) throw new Error('取得に失敗しました');
-        
-        const data = await res.json();
-        
-       
-        const html = data.contents.map(item => {
-  const date = new Date(item.publishedAt).toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  });
+        const plain = (item.content || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+        const excerpt = plain.length > 120 ? plain.slice(0, 120) + "…" : plain;
 
+        return `
+          <article class="post-card">
+            <header class="post-header">
+              <time class="post-date">${date}</time>
+              <h2 class="post-title">${item.title}</h2>
+            </header>
+            <p class="post-excerpt">${excerpt}</p>
+            <a href="post.html?id=${item.id}" class="read-more-btn">記事をよむ</a>
+          </article>
+        `;
+      }).join("");
 
-  const plain = (item.content || "")
-    .replace(/<[^>]*>/g, "")      
-    .replace(/\s+/g, " ")        
-    .trim();
-
-  const excerpt = plain.length > 120 ? plain.slice(0, 120) + "…" : plain;
-
-  return `
-    <article class="post-card">
-      <header class="post-header">
-        <time class="post-date">${date}</time>
-        <h2 class="post-title">${item.title}</h2>
-      </header>
-
-  
-      <p class="post-excerpt">${excerpt}</p>
-
-      <a href="post.html?id=${item.id}" class="read-more-btn">
-        記事をよむ
-      </a>
-    </article>
-  `;
-}).join("");
-
-
-        
-        container.innerHTML = html;
-        container.classList.remove("loading-state");
-
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = `<p class="error-msg">記事を読み込めませんでした。時間をおいて再度お試しください。</p>`;
-      }
+      container.innerHTML = html;
+      container.classList.remove("loading-state");
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = `<p class="error-msg">記事を読み込めませんでした。</p>`;
     }
-
-    
-    fetchBlog();
-  </script>
-
-</body>
+  }
+  fetchBlog();
 </script>
 
+</body>
 </html>
