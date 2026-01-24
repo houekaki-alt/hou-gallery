@@ -1,4 +1,4 @@
-/* bodyから最後までのスタイルをここに移動 */
+
 body {
   font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   line-height: 1.8;
@@ -109,3 +109,11 @@ h1.page-title {
   transform: scale(1.05); 
   background: #000;
 }
+
+.post-excerpt{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
