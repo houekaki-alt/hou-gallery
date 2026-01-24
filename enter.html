@@ -1,11 +1,23 @@
-<form method="post" action="functions/api/enter.ts">
-  <input id="pass-input" name="pass" type="password" placeholder="password" />
-  <button type="button" onclick="togglePass()">👁️</button> <button type="submit">OK</button>
-</form>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Password</title>
+</head>
+<body>
+  <h2>パスワード入力してもろて</h2>
+  <input type="password" id="pw">
+  <button onclick="check()">入る</button>
 
-<script>
-function togglePass() {
-  const p = document.getElementById('pass-input');
-  p.type = p.type === 'password' ? 'text' : 'password';
-}
-</script>
+  <script>
+    function check() {
+      const pass = "omaegasukida";
+      if (document.getElementById("pw").value === pass) {
+        location.href = "inside.html";
+      } else {
+        alert("違うよ、ごめんね長いパスワードで、打ちにくいよね");
+      }
+    }
+  </script>
+</body>
+</html>
