@@ -7,27 +7,21 @@
 </head>
 <body>
   <h2>パスワード入力してもろて</h2>
-  <input type="password" id="pw">
+  <input type="password" id="pw" inputmode="latin-prose">
   <button type="button" onclick="check()">入る</button>
 
   <script>
     function check() {
-      const pass = "omaegasukida";
-      const inputElement = document.getElementById("pw");
-      const v = inputElement.value.trim(); 
-
-      if (v === pass) {
+      const v = document.getElementById("pw").value.trim();
       
-        document.cookie = "blog_ok=1; Max-Age=2592000; Path=/";
-
-     
-        try {
-          location.replace("/inside.html");
-        } catch (e) {
-          location.href = "/inside.html";
-        }
+      if (v === "omaegasukida") {
+      
+        document.cookie = "blog_ok=1; Path=/;";
+        
+       
+        window.location.href = "./inside.html";
       } else {
-        alert("違うよ、長いパスワードでごめんね、打ちにくいよね");
+        alert("違うよ、長いパスワードでごめんね");
       }
     }
   </script>
