@@ -20,9 +20,7 @@ body{
   background:var(--bg);
 }
 
-/* =====================
-   Topbar
-===================== */
+
 .topbar{
   display:flex;
   justify-content:space-between;
@@ -41,7 +39,7 @@ body{
   gap:14px;
 }
 
-/* 文字リンク統一（X / マシュマロ / Mail / √） */
+
 .icons a,
 .header-pill,
 .secret-key{
@@ -60,9 +58,7 @@ body{
 }
 .secret-key:focus{outline:none;}
 
-/* =====================
-   Layout
-===================== */
+
 .wrap{
   max-width:1120px;
   margin:0 auto;
@@ -71,9 +67,8 @@ body{
 
 .msg{color:var(--muted);}
 
-/* =====================
-   Intro
-===================== */
+
+
 .intro{
   padding:18px 0 26px;
   border-bottom:1px solid var(--line);
@@ -81,9 +76,7 @@ body{
 .intro p{margin:0 0 10px;}
 .intro .muted{font-size:13px;opacity:.7;}
 
-/* =====================
-   Section
-===================== */
+
 .section{margin-top:34px;}
 .section-title{
   font-size:18px;
@@ -91,9 +84,7 @@ body{
   margin:0 0 12px;
 }
 
-/* =====================
-   Tags
-===================== */
+
 .tagbar-wrap{
   display:grid;
   grid-template-columns:36px 1fr 36px;
@@ -101,7 +92,7 @@ body{
   gap:10px;
 }
 
-/* 矢印 */
+
 .tag-nav{
   width:36px;
   height:36px;
@@ -111,26 +102,26 @@ body{
   cursor:pointer;
 }
 
-/* スクロール領域 */
+
 .tagbar{
   display:flex;
   gap:10px;
   overflow-x:auto;
   overflow-y:hidden;
-  padding:12px 2px 30px; /* ← 影の受け皿 */
+  padding:12px 2px 30px; 
   scroll-behavior:smooth;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 }
 .tagbar::-webkit-scrollbar{display:none;}
 
-/* タグチップ */
+
 .tagchip{
   padding:9px 14px;
   border-radius:999px;
   background:#fff;
   border:1px solid rgba(0,0,0,.08);
-  box-shadow:0 10px 18px rgba(0,0,0,.09); /* 下寄り影 */
+  box-shadow:0 10px 18px rgba(0,0,0,.09); 
   font-size:13px;
   text-decoration:none;
   color:var(--text);
@@ -139,9 +130,7 @@ body{
 }
 .tagchip:hover{transform:translateY(-1px);}
 
-/* =====================
-   Recent / Random
-===================== */
+
 .hscroll{
   display:flex;
   gap:16px;
@@ -156,9 +145,6 @@ body{
   gap:14px;
 }
 
-/* =====================
-   Cards
-===================== */
 .thumb-container{
   background:var(--card);
   border-radius:var(--radius);
@@ -170,14 +156,14 @@ body{
   width:100%;
   aspect-ratio:1/1;
   object-fit:cover;
-  cursor:pointer;            /* 虫眼鏡禁止 */
+  cursor:pointer;       
   transition:transform .18s ease;
 }
 .thumb-container:hover .thumb{
   transform:scale(1.035);
 }
 
-/* 評価 */
+
 .thumb-reaction-bar{
   padding:10px 12px;
   background:#fff;
@@ -209,9 +195,7 @@ body{
   opacity:.7;
 }
 
-/* =====================
-   Modal
-===================== */
+
 .modal{
   position:fixed;
   inset:0;
@@ -254,7 +238,7 @@ body{
   cursor:pointer;
 }
 
-/* ▼▼ここを修正：絵文字センター＋Xボタン黒くシュッと */
+
 .reaction-bar{
   display:grid;
   grid-template-columns:1fr auto;
@@ -265,7 +249,7 @@ body{
   background:#fff;
 }
 
-/* 絵文字はど真ん中固定 */
+
 .reactions-container{
   justify-self:center;
   display:grid;
@@ -288,7 +272,7 @@ body{
   cursor:pointer;
 }
 
-/* Xへ共有：黒ボタン */
+
 .share-btn{
   justify-self:end;
   border:1px solid rgba(0,0,0,.14);
@@ -301,7 +285,6 @@ body{
 }
 .share-btn:hover{ background:#000; }
 
-/* ナビ */
 .nav{
   position:fixed;
   top:50%;
@@ -317,21 +300,54 @@ body{
 .nav.prev{left:10px;}
 .nav.next{right:10px;}
 
-/* =====================
-   Responsive
-===================== */
+
 @media (max-width:760px){
   .brand{font-size:22px;}
   .hscroll .thumb-container{flex-basis:240px;}
   .tagbar-wrap{grid-template-columns:1fr;}
   .tag-nav{display:none;}
 
-  /* スマホは共有ボタンも下に回す（崩れ防止） */
+ 
   .reaction-bar{
     grid-template-columns:1fr;
     justify-items:center;
   }
   .share-btn{
     justify-self:center;
+  }
+}
+
+@media (max-width: 520px){
+  .topbar{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    gap:10px;
+    align-items:center;
+    padding:14px 16px;
+  }
+
+  .brand{
+    font-size:22px;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .icons{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:10px 12px;
+  }
+
+  
+  .icons a,
+  .header-pill,
+  .secret-key{
+    font-size:14px;
+    line-height:1;
+    padding:2px 0;
+    white-space:nowrap;
   }
 }

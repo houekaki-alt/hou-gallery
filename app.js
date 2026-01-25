@@ -1,9 +1,7 @@
-// =========================
-// microCMS proxy（タグ）
-// =========================
+
 const CMS_BASE = "https://microcms-proxy.hou-ekaki.workers.dev";
 
-// ===== tags =====
+
 async function loadTagsFromCMS() {
   const url = `${CMS_BASE}/cms/tags?_=${Date.now()}`;
   const res = await fetch(url, { cache: "no-store" });
@@ -17,7 +15,7 @@ async function loadTagsFromCMS() {
     .filter((t) => t.name);
 }
 
-// ===== artworks =====
+
 async function loadArtworksFromCMS() {
   const base = "https://reactions-api.hou-ekaki.workers.dev/cms/artworks";
   const limit = 100;
@@ -57,9 +55,7 @@ async function loadArtworksFromCMS() {
   });
 }
 
-// =========================
-// reactions
-// =========================
+
 const FIXED_REACTIONS = ["👍", "❤️", "🙏"];
 const API_URL = "https://reactions-api.hou-ekaki.workers.dev";
 
@@ -80,9 +76,7 @@ async function apiPost(imgKey, emoji) {
   return r.json().catch(() => ({}));
 }
 
-// =========================
-// state & elements
-// =========================
+
 let images = [];
 let modalItems = [];
 let modalIndex = 0;
@@ -107,9 +101,7 @@ function keyFromItem(item) {
   return item.legacyImgKey ? String(item.legacyImgKey) : String(item.id);
 }
 
-// =========================
-// utils
-// =========================
+
 function renderLoading(container, isModal = false) {
   if (!container) return;
   container.innerHTML = "";
@@ -135,9 +127,7 @@ function sortByNewest(arr) {
   return [...arr].sort((a, b) => (pick(b) > pick(a) ? 1 : pick(b) < pick(a) ? -1 : 0));
 }
 
-// =========================
-// reactions UI
-// =========================
+
 function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
   if (!container) return;
   const map = Object.fromEntries((reactionsArr || []).map((r) => [r.emoji, r.count]));
@@ -153,7 +143,7 @@ function renderReactionsUI(reactionsArr, container, imgKey, isModal = false) {
       e.stopPropagation();
       const span = btn.querySelector("span");
       const before = parseInt(span.textContent, 10) || 0;
-      span.textContent = String(before + 1); // 楽観更新
+      span.textContent = String(before + 1); 
       try {
         await apiPost(imgKey, emoji);
         const latest = await apiGet(imgKey);
@@ -181,9 +171,7 @@ function syncModal(imgKey, latest) {
   renderReactionsUI(latest, reactionsContainer, imgKey, true);
 }
 
-// =========================
-// modal
-// =========================
+
 function openModal(list, idx) {
   if (!list?.length) return;
   modalItems = list;
@@ -225,9 +213,7 @@ prevBtn?.addEventListener("click", prev);
 nextBtn?.addEventListener("click", next);
 modal?.addEventListener("click", (e) => e.target === modal && closeModal());
 
-// =========================
-// thumbs
-// =========================
+
 function renderThumbList(list, containerEl) {
   if (!containerEl) return;
   containerEl.innerHTML = "";
@@ -259,11 +245,9 @@ function renderThumbList(list, containerEl) {
   });
 }
 
-// =========================
-// tags (count & order)
-// =========================
+
 function buildTagCountMap(items) {
-  const map = new Map(); // name -> count
+  const map = new Map(); 
   items.forEach((it) => (it.tags || []).forEach((t) => {
     const name = String(t).trim();
     if (!name) return;
@@ -279,7 +263,7 @@ function renderTagBar(tags) {
     const a = document.createElement("a");
     a.className = "tagchip";
     a.href = `?tag=${encodeURIComponent(t.name)}`;
-    a.textContent = `${t.name} (${t.count})`; // ← 件数表示
+    a.textContent = `${t.name} (${t.count})`; 
     tagbar.appendChild(a);
   });
 }
@@ -297,25 +281,23 @@ function applyTagFilter(allItems) {
   return allItems.filter((x) => (x.tags || []).includes(tag));
 }
 
-// =========================
-// init
-// =========================
+
 async function init() {
   msg.textContent = "読み込み中…";
 
   images = await loadArtworksFromCMS();
   const countMap = buildTagCountMap(images);
 
-  // CMSタグ × 件数 → 多い順（同数は五十音）
+  
   try {
-    let tags = await loadTagsFromCMS(); // [{name, order}]
+    let tags = await loadTagsFromCMS(); 
     tags = tags
       .map((t) => ({ ...t, count: countMap.get(t.name) || 0 }))
-      .filter((t) => t.count > 0) // 0件は非表示（外したければ消す）
+      .filter((t) => t.count > 0) 
       .sort((a, b) => (b.count - a.count) || a.name.localeCompare(b.name, "ja"));
     renderTagBar(tags);
   } catch {
-    // フォールバック：作品から直接
+    
     const tags = Array.from(countMap.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => (b.count - a.count) || a.name.localeCompare(b.name, "ja"));
@@ -326,8 +308,8 @@ async function init() {
   const filtered = applyTagFilter(images);
   const newest = sortByNewest(filtered);
 
-  renderThumbList(newest.slice(0, 3), recentGrid);           // 新着3
-  renderThumbList(shuffle(filtered).slice(0, 24), randomGrid); // ランダム
+  renderThumbList(newest.slice(0, 3), recentGrid);           
+  renderThumbList(shuffle(filtered).slice(0, 24), randomGrid); 
 
   msg.textContent = filtered.length ? "" : "該当タグの作品がありません。";
 }
