@@ -23,33 +23,62 @@
     gtag('config', 'G-EPCH9WHLQJ');
   </script>
 </head>
+
 <body>
- <header class="topbar">
-  <div class="brand">@hou_enj/illustration</div>
-  <div class="icons">
-    <a href="https://x.com/hou_enj" target="_blank" rel="noopener">X</a>
-    <a href="mailto:hou.ekaki@gmail.com">Mail</a>
+  <header class="topbar">
+    <div class="brand">@hou_enj/illustration</div>
 
-    <button id="secretKey" class="secret-key" aria-label="secret">√</button>
-  </div>
-</header>
+    <div class="icons">
+      <a href="https://x.com/hou_enj" target="_blank" rel="noopener">X</a>
 
+      <a class="header-pill"
+         href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion"
+         target="_blank" rel="noopener">マシュマロ</a>
 
+      <a href="mailto:hou.ekaki@gmail.com">Mail</a>
+
+      <button id="secretKey" class="secret-key" aria-label="secret">√</button>
+    </div>
+  </header>
 
   <div class="wrap">
-    <div class="about">
-      苞(@hou_enj)の創作や版権物をまとめたイラストサイトです。<br>
-      画像の無断転載 / 自作発言 / AI学習は禁止とします。<br>
-      版権物に関しましては、ご本人様・作者様・関係者様とは一切関係ありません。<br><br>
-      御用がありましたら右上のメールよりご連絡下さい。<br>
-      ご意見・ご感想は下記よりお願いします。
-      <div>
-        <a class="btn" href="https://marshmallow-qa.com/8slmrixz9ktivo5?t=Q65D9f&utm_medium=url_text&utm_source=promotion" target="_blank" rel="noopener">マシュマロ</a>
+    <section class="intro">
+      <div class="intro-text">
+        <p>苞(@hou_enj)の版権イラストをまとめたサイトです。</p>
+        <p>画像の無断転載 / 自作発言 / AI学習は禁止とします。</p>
+        <p>版権物に関しましては、ご本人様・作者様・関係者様とは一切関係ありません。</p>
+        <p>御用がありましたら右上のMail/マシュマロよりご連絡下さい。</p>
       </div>
-    </div>
+    </section>
 
-    <div id="msg"></div>
-    <div id="carousel" class="carousel"></div>
+    <div id="msg" class="msg"></div>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">タグ一覧</h2>
+      </div>
+
+     
+      <div class="tagbar-wrap">
+        <button id="tagPrev" class="tag-nav" type="button" aria-label="prev tag">‹</button>
+        <div id="tagbar" class="tagbar" aria-label="tags"></div>
+        <button id="tagNext" class="tag-nav" type="button" aria-label="next tag">›</button>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">新着</h2>
+      </div>
+      <div id="recent" class="hscroll"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2 class="section-title">過去作品</h2>
+      </div>
+      <div id="random" class="grid"></div>
+    </section>
   </div>
 
   <div id="modal" class="modal" aria-hidden="true">
@@ -73,16 +102,8 @@
 
   <script src="./app.js"></script>
   <script>
-  const key = document.getElementById("secretKey");
-  if (key) {
-    key.addEventListener("click", () => {
-      location.href = "/enter.html";
-    });
-  }
-</script>
-
+    const key = document.getElementById("secretKey");
+    if (key) key.addEventListener("click", () => location.href = "/enter.html");
+  </script>
 </body>
 </html>
-
-
-
